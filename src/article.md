@@ -61,7 +61,7 @@ export enum KeyCodes {
 
 #### 4.1.2 - El componente KeyboardNavigable
 
-Como hemos comentado antes, vamos a crear un componente que encapsule la capacidad de navegación. Desde el explorador de proyecto, hacemos clic derecho en la carpeta *src/components* y elegimos *generate Stencil component*. Llamaremos a nuestro componente **KeyboardNavigable**. La extensión nos genera un componente ya preconfigurado. Agregamos el flag para el shadow Dom en la anotación **@Component**.
+Como hemos comentado antes, vamos a crear un componente que encapsule la capacidad de navegación. Desde el explorador de proyecto, hacemos clic derecho en la carpeta *src/components* y elegimos *generate Stencil component*. Llamaremos a nuestro componente **KeyboardNavigable**. La extensión nos genera un componente ya preconfigurado. Agregamos el flag para deshabilitar shadow Dom en la anotación **@Component** de forma que sea transparente.
 
 Vamos a agregar aquí el lanzamiento de eventos cuando se presionen las teclas que queremos manejar. Esto evitará tener que comprobar todos los eventos de teclado en el listener, de modo que será más limpio y eficiente. Para ello, utilizaremos las anotaciones **@Event** para lanzar los eventos personalizados y **@Listen** para escuchar el teclado.
 
@@ -73,7 +73,7 @@ import { KeyCodes } from '../../utils/keyboard-utils';
 @Component({
     tag: 'keyboard-navigable',
     styleUrl: 'keyboard-navigable.css',
-    shadow: true
+    shadow: false
 })
 export class KeyboardNavigable {
 
@@ -117,4 +117,82 @@ Algunas notas sobre este componente:
 * Como solo nos interesa la tecla que se ha pulsado, el evento puede llevar cualquier tipo de valor.
 * Usamos *keyup* y no *keydown* por motivos de accesibilidad. Este evento solo se llama una vez al soltar la tecla, mientras que *keydown* puede llamarse múltiples veces durante una pulsación prolongada.
 * Utilizamos el atributo *role=none* en el elemento *Host* para que el componente sea ignorado por la capa de accesibilidad. Solo encapsula comportamiento, no queremos que se represente de ninguna forma al usuario. Esto no impide que lo que haya dentro mediante el *slot* se presente al usuario. Utilizar el atributo *aria-hidden* para ese propósito.
+
+#### 4.1.3 - La interfaz DirectionalNavigable
+
+Como hemos visto, hay una infinidad de widgets que pueden requerir de la navegación por teclado. En nuestro caso, que la hemos simplificado a cuatro teclas, debemos tener una forma para que esta navegación se personalice en cada caso sin necesidad de duplicar el código.
+
+Vamos a crear una carpeta llamada *abstractions* en la que crearemos la interfaz *DirectionalNavigable*:
+
+```
+export interface DirectionalNavigable {
+    getLeftItem(): HTMLElement | undefined;
+    getRightItem(): HTMLElement | undefined;
+    getUpItem(): HTMLElement | undefined;
+    getDownItem(): HTMLElement | undefined;
+}
+```
+
+Especificamos que el tipo retornado es HTMLElement | undefined para prevenir problemas con el tipado estricto. Si usamos tipado flexible, no es necesario, pero puede provocar errores en otros puntos del sistema.
+
+#### 4.1.4 - El componente KeyboardNavigationListener
+
+Aquí tenemos la pieza final del conjunto. Creamos un nuevo componente que actuará como listener de los eventos lanzados por **KeyboardNavigable**:
+
+```
+import { Component, h, Prop, Host, Listen } from '@stencil/core';
+import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
+
+
+@Component({
+    tag: 'keyboard-navigation-listener',
+    styleUrl: 'keyboard-navigation-listener.css',
+    shadow: false
+})
+export class KeyboardNavigationListener {
+
+    @Prop() navigable!: DirectionalNavigable;
+
+    @Listen('upArrow')
+    protected upArrowHandler() {
+        const itemToFocus = this.navigable.getUpItem();
+        this.focus(itemToFocus);
+    }
+
+    @Listen('downArrow')
+    protected downArrowHandler() {
+        const itemToFocus = this.navigable.getDownItem();
+        this.focus(itemToFocus);
+    }
+
+    @Listen('leftArrow')
+    protected leftArrowHandler() {
+        const itemToFocus = this.navigable.getLeftItem();
+        this.focus(itemToFocus);
+    }
+
+    @Listen('rightArrow')
+    protected rightArrowHandler() {
+        const itemToFocus = this.navigable.getRightItem();
+        this.focus(itemToFocus);
+    }
+
+    focus(item: HTMLElement | undefined) {
+        if (item !== undefined) item.focus();
+    }
+
+    render() {
+        return (
+            <Host role="none">
+                <slot />
+            </Host>
+        );
+    }
+}
+```
+
+Algunas notas sobre el componente:
+* Contiene la propiedad **navigable** que debe ser asignada por su padre. De esta forma, podemos recuperar el elemento al que hay que desplazar el foco sin importar el contexto concreto. De eso se encarga cada widget específico.
+* Sólo hacemos foco si el valor devuelto por el padre no es *undefined*. En caso contrario, no hay acción.
+* Como **KeyboardNavigable**, el *role* del elemento *Host* es none y no tiene shadow DOM.
 
