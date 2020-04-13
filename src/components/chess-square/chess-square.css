@@ -1,0 +1,19 @@
+chess-square {
+    height: 3em;
+    width: 3em;
+    border: 0px;
+}
+
+chess-square:focus {
+    border: 1px solid #888888;
+}
+
+.white-square {
+    background-color: white;
+    color: black;
+}
+
+.black-square {
+    background-color: black;
+    color: white;
+}
