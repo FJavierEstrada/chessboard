@@ -1,5 +1,5 @@
 import { Component, h, Prop, Host, Listen, Event, EventEmitter } from '@stencil/core';
-import { ChessPiece, arrayToBoardRow, arrayToBoardColumn, BoardSide, SquareCoordinates } from '../../utils/chess-utils';
+import { ChessPieceDescription, arrayToBoardRow, arrayToBoardColumn, BoardSide, SquareCoordinates, ChessPiece } from '../../utils/chess-utils';
 import { KeyboardNavigable } from '../keyboard-navigable/keyboard-navigable';
 
 enum SquareColour { white, black }
@@ -13,7 +13,7 @@ export class ChessSquare {
 
     @Prop() row!: number;
     @Prop() column!: number;
-    @Prop() piece?: string;
+    @Prop() piece?: ChessPiece;
     @Prop() side!: BoardSide;
 
     @Event() squareFocused: EventEmitter<SquareCoordinates>;
@@ -29,7 +29,7 @@ export class ChessSquare {
     }
 
     private getAccessibleDescription = (): string => {
-        return `${arrayToBoardRow(this.row)}${arrayToBoardColumn(this.column)} - ${this.piece ? ChessPiece[this.piece] : ""}`;
+        return `${arrayToBoardRow(this.row)}${arrayToBoardColumn(this.column)} - ${this.piece ? ChessPieceDescription[this.piece] : ""}`;
     }
 
     private isFirstSquare = (): boolean => {

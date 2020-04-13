@@ -1,5 +1,7 @@
 
-export enum ChessPiece {
+export type ChessPiece = "K" | "Q" | "R" | "B" | "N" | "P" | "k" | "q" | "r" | "b" | "n" | "p" | null;
+
+export enum ChessPieceDescription {
     K = "White king",
     Q = "White queen",
     R = "White Rook",
