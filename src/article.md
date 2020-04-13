@@ -196,3 +196,70 @@ Algunas notas sobre el componente:
 * Sólo hacemos foco si el valor devuelto por el padre no es *undefined*. En caso contrario, no hay acción.
 * Como **KeyboardNavigable**, el *role* del elemento *Host* es none y no tiene shadow DOM.
 
+### 4.2. - Aplicar la navegación a nuestros componentes
+
+Una vez que hemos definido el sistema de navegación, vamos a implementarlo para comprobar que funciona correctamente. Para nuestro caso, tendremos dos componentes principales: ChessBoard y ChessSquare. El primero define el comportamiento general del tablero, mientras que el segundo representa una de las casillas o escaques. Veremos cómo componerlos para obtener el resultado deseado. Pero antes, vamos a necesitar unos pequeños añadidos para interpretar correctamente el tablero mediante accesibilidad.
+
+#### 4.2.1 - Intérprete de piezas
+
+Aunque podríamos utilizar imágenes para representar las piezas en el tablero, pretendemos que este ejemplo sea lo más simple posible. Por eso, vamos a utilizar una representación textual con las iniciales de cada una. Podríamos pensar que basta con ponerlas de uno u otro color, pero ten en cuenta que, igual que las piezas son blancas o negras, las casillas también. Esto podría causar problemas de contraste.
+
+Como solución, vamos a utilizar la misma nomenclatura que la [notación FEN](https://es.wikipedia.org/wiki/Notaci%C3%B3n_de_Forsyth-Edwards). Las piezas blancas irán en mayúscula y las negras en minúscula. Para ello, vamos a crear un enum en *utils/chess-utils.ts*:
+
+```
+export enum ChessPiece {
+    K = "White king",
+    Q = "White queen",
+    R = "White Rook",
+    B = "White bishop",
+    N = "White knight",
+    P = "White pawn",
+    k = "Black king",
+    q = "Black queen",
+    r = "Black rook",
+    b = "Black Bishop",
+    n = "Black knight",
+    p = "Black pawn"
+}
+```
+
+Usaremos las letras como representación gráfica. Para cuestiones de accesibilidad, utilizaremos esta traducción. Bastará con utilizar el enum como si fuera un objeto, pasando como clave la inicial.
+
+#### 4.2.2 - Intérprete de casillas
+
+Seguro que alguna vez has visto un tablero de ajedrez y te han llamado la atención las letras y los números que se sitúan en los bordes. Aunque podrían usarse para jugar al Hundir la flota, el propósito es identificar de forma unívoca cada casilla del tablero. Aunque existen diferentes notaciones para expresar los movimientos en ajedrez, la más extendida es la [notación algebraica](https://es.wikipedia.org/wiki/Notaci%C3%B3n_algebraica). En esta se identifican las casillas con el par letra-número. Para trasladar esto a nuestro ámbito, debemos tener en cuenta dos cosas:
+
+* El modelo del tablero lo representaremos como una matriz bidimensional. Las matrices admiten como argumentos en sus posiciones números, no letras.`Además, empiezan en 0, no en 1.
+* El tablero empieza con la posición A1 en la esquina inferior izquierda y termina en H8 en la esquina superior derecha. Eso siempre que se represente del lado de las blancas.
+
+Parece evidente que necesitamos una forma de traducir de un sistema al otro, de forma que podamos trabajar de manera transparente. Así que, vamos a añadir algunas cosas más a nuestro archivo *utils/chess-utils.ts*:
+
+```
+export enum BoardSide { white, black }
+
+export function arrayToBoardColumn(col: number): string | undefined {
+    switch (col) {
+        case 0: return "A";
+        case 1: return "B";
+        case 2: return "C";
+        case 3: return "D";
+        case 4: return "E";
+        case 5: return "F";
+        case 6: return "G";
+        case 7: return "H";
+    }
+}
+
+export function arrayToBoardRow(row: number): number | undefined {
+    if (row >= 0 && row <= 7) {
+        return 8 - row;
+    }
+    else return undefined;
+}
+```
+
+Con esto, ya estamos listos para crear los componentes.
+
+#### 4.2.3 - El componente ChessSquare
+
+Este componente representa la mínima unidad del tablero. En él almacenaremos los datos para su representación, incluida la pieza, si la hubiera. Además, añadiremos el componente **KeyboardNavigable**:
