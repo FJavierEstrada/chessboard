@@ -1,6 +1,7 @@
-import { Component, h, Prop, State, Listen, Watch } from '@stencil/core';
-import { BoardSide, SquareCoordinates, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy } from '../../utils/chess-utils';
+import { Component, h, Prop, State, Listen, Watch, Host } from '@stencil/core';
+import { BoardSide, SquareCoordinates, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel, BoardView } from '../../utils/chess-utils';
 import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
+import { KeyboardNavigationListener } from '../keyboard-navigation-listener/keyboard-navigation-listener';
 
 
 @Component({
@@ -12,9 +13,11 @@ export class ChessBoard implements DirectionalNavigable {
 
     @Prop() side: BoardSide = BoardSide.white;
 
-    @State() focusedSquare: SquareCoordinates;
-    @State() boardModel: HTMLElement[][];
+    @State() boardModel: BoardModel;
 
+
+    private focusedSquare: SquareCoordinates;
+    private boardView: BoardView;
     private navigabilityStrategy: DirectionalNavigabilityStrategy;
 
     @Watch('side')
@@ -28,31 +31,58 @@ export class ChessBoard implements DirectionalNavigable {
         this.focusedSquare = event.detail;
     }
 
+    componentWillLoad() {
+        this.boardModel = this.generateDefaultPosition();
+    }
+
     getLeftItem(): HTMLElement {
         const leftCoordinates = this.navigabilityStrategy.getLeftCoordinates(this.focusedSquare);
-        return this.boardModel[leftCoordinates.row][leftCoordinates.column];
+        return this.boardView[leftCoordinates.row][leftCoordinates.column];
     }
 
     getRightItem(): HTMLElement {
         const RightCoordinates = this.navigabilityStrategy.getRightCoordinates(this.focusedSquare);
-        return this.boardModel[RightCoordinates.row][RightCoordinates.column];
+        return this.boardView[RightCoordinates.row][RightCoordinates.column];
     }
 
     getUpItem(): HTMLElement {
         const upCoordinates = this.navigabilityStrategy.getUpCoordinates(this.focusedSquare);
-        return this.boardModel[upCoordinates.row][upCoordinates.column];
+        return this.boardView[upCoordinates.row][upCoordinates.column];
     }
 
     getDownItem(): HTMLElement {
         const downCoordinates = this.navigabilityStrategy.getDownCoordinates(this.focusedSquare);
-        return this.boardModel[downCoordinates.row][downCoordinates.column];
+        return this.boardView[downCoordinates.row][downCoordinates.column];
     }
 
     render() {
         return (
-            <div>
-                <p>Hello ChessBoard!</p>
-            </div>
+            <Host role="application">
+                <KeyboardNavigationListener navigable={this}>
+                    }/* Draw the board here */}
+</KeyboardNavigationListener>
+            </Host>
         );
     }
+
+    private generateDefaultPosition(): BoardModel {
+        function generateFilledRow(piece: ChessPiece): ChessPiece[] {
+            const row: ChessPiece[] = [];
+            for (let i = 0; i < 8; i++) {
+                row.push(piece);
+            }
+            return row;
+        }
+
+        const board: BoardModel = [];
+        board.push(["r", "n", "b", "q", "k", "b", "n", "r"]);
+        board.push(generateFilledRow("p"));
+        for (let i = 2; i < 6; i++) {
+            board.push(generateFilledRow(null));
+        }
+        board.push(generateFilledRow("P"));
+        board.push(["R", "N", "B", "Q", "K", "B", "N", "R"]);
+        return board;
+    }
+
 }

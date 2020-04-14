@@ -1,6 +1,10 @@
 
 export type ChessPiece = "K" | "Q" | "R" | "B" | "N" | "P" | "k" | "q" | "r" | "b" | "n" | "p" | null;
 
+export type BoardModel = ChessPiece[][];
+
+export type BoardView = HTMLElement[][];
+
 export enum ChessPieceDescription {
     K = "White king",
     Q = "White queen",
