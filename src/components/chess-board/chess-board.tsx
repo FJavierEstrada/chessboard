@@ -2,6 +2,7 @@ import { Component, h, Prop, State, Listen, Watch, Host } from '@stencil/core';
 import { BoardSide, SquareCoordinates, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel, BoardView } from '../../utils/chess-utils';
 import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
 import { KeyboardNavigationListener } from '../keyboard-navigation-listener/keyboard-navigation-listener';
+import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
 
 
 @Component({
@@ -19,11 +20,11 @@ export class ChessBoard implements DirectionalNavigable {
     private focusedSquare: SquareCoordinates;
     private boardView: BoardView;
     private navigabilityStrategy: DirectionalNavigabilityStrategy;
+    private boardRenderer: BoardRenderer;
 
     @Watch('side')
     sideChanged(newSide: BoardSide) {
-        if (newSide === BoardSide.white) this.navigabilityStrategy = new WhiteSideNavigabilityStrategy();
-        else this.navigabilityStrategy = new BlackSideNavigabilityStrategy();
+        this.setNavigationAndRenderStrategies(newSide);
     }
 
     @Listen('squareFocused')
@@ -32,7 +33,12 @@ export class ChessBoard implements DirectionalNavigable {
     }
 
     componentWillLoad() {
+        this.setNavigationAndRenderStrategies(this.side);
         this.boardModel = this.generateDefaultPosition();
+    }
+
+    componentWillRender() {
+        this.boardView = this.boardRenderer.renderBoard(this.boardModel);
     }
 
     getLeftItem(): HTMLElement {
@@ -59,8 +65,13 @@ export class ChessBoard implements DirectionalNavigable {
         return (
             <Host role="application">
                 <KeyboardNavigationListener navigable={this}>
-                    }/* Draw the board here */}
-</KeyboardNavigationListener>
+                    {this.boardView.forEach((row: HTMLElement[]) => {
+                        row.forEach((square: HTMLElement) => square);
+                    })
+                    }
+                    {this.boardRenderer.renderRowHeader()}
+                    {this.boardRenderer.renderColumnHeader()}
+                </KeyboardNavigationListener>
             </Host>
         );
     }
@@ -83,6 +94,16 @@ export class ChessBoard implements DirectionalNavigable {
         board.push(generateFilledRow("P"));
         board.push(["R", "N", "B", "Q", "K", "B", "N", "R"]);
         return board;
+    }
+
+    setNavigationAndRenderStrategies(side: BoardSide) {
+        if (side === BoardSide.white) {
+            this.navigabilityStrategy = new WhiteSideNavigabilityStrategy();
+            this.boardRenderer = new WhiteSideRenderer();
+        } else {
+            this.navigabilityStrategy = new BlackSideNavigabilityStrategy();
+            this.boardRenderer = new BlackSideRenderer();
+        }
     }
 
 }
