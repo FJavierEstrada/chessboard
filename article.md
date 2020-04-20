@@ -326,3 +326,190 @@ export class FocusedItemListener {
     }
 }
 ```
+
+### 4.2 - Aplicar la solución a nuestro problema
+
+Una vez que hemos construido las piezas básicas que vamos a reutilizar para diferentes componentes, vamos a usarlas en nuestro caso concreto, el tablero de ajedrez. Tendremos un componente básico **ChessSquare** que representa cada casilla y el componente global **ChessBoard** que engloba todo el conjunto y contiene la lógica.
+
+Es importante resaltar que vamos a plantear nuestro modelo virtual de tablero según la representación del mismo cuando lo ponemos del lado del blanco, desde la esquina superior izquierda a la inferior derecha. Así, la posición [0, 0] del modelo virtual se corresponderá con la casilla A8, y la posición [7, 7] con la casilla H1.
+
+#### 4.12.1 - Algunas utilidades auxiliares
+
+Debemos tener en cuenta que el tablero de ajedrez se representa de forma parecida, pero a la vez distinta, a una matriz bidimensional. En lugar de dos componentes numéricas, las columnas se especifican mediante una letra de la A a la H. Además, dado que el tablero puede girarse, la representación gráfica no coincide nunca con el modelo. Vamos a crear el archivo *utils/chess-utils.ts*. Para empezar, definiremos algunos tipos y enums que nos harán la vida más sencilla:
+
+```
+export type ChessPiece = "K" | "Q" | "R" | "B" | "N" | "P" | "k" | "q" | "r" | "b" | "n" | "p" | null;
+
+export type BoardModel = ChessPiece[][];
+
+export type BoardView = HTMLElement[][];
+
+export enum ChessPieceDescription {
+    K = "White king",
+    Q = "White queen",
+    R = "White Rook",
+    B = "White bishop",
+    N = "White knight",
+    P = "White pawn",
+    k = "Black king",
+    q = "Black queen",
+    r = "Black rook",
+    b = "Black Bishop",
+    n = "Black knight",
+    p = "Black pawn"
+}
+
+export enum BoardSide { white, black }
+```
+
+También tenemos que crear algunas utilidades que nos permitan traducir de un sistema al otro. Esto también influye a la hora de interpretar a qué casilla se debe mover cuando pulsamos una tecla. Para este caso, implementamos un patrón estrategia:
+
+```
+export function arrayToBoardColumn(col: number): string | undefined {
+    switch (col) {
+        case 0: return "A";
+        case 1: return "B";
+        case 2: return "C";
+        case 3: return "D";
+        case 4: return "E";
+        case 5: return "F";
+        case 6: return "G";
+        case 7: return "H";
+    }
+}
+
+export function arrayToBoardRow(row: number): number | undefined {
+    if (row >= 0 && row <= 7) {
+        return 8 - row;
+    }
+    else return undefined;
+}
+
+export interface DirectionalNavigabilityStrategy {
+    getLeftCoordinates(current: ItemPosition2D): ItemPosition2D;
+    getRightCoordinates(current: ItemPosition2D): ItemPosition2D;
+    getUpCoordinates(current: ItemPosition2D): ItemPosition2D;
+    getDownCoordinates(current: ItemPosition2D): ItemPosition2D;
+}
+
+export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
+
+    getLeftCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.column === 0) return current;
+        return { row: current.row, column: current.column - 1 };
+    }
+
+    getRightCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.column === 7) return current;
+        return { row: current.row, column: current.column + 1 };
+    }
+
+    getUpCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.row === 0) return current;
+        return { row: current.row - 1, column: current.column };
+    }
+
+    getDownCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.row === 7) return current;
+        return { row: current.row + 1, column: current.column };
+    }
+
+}
+
+export class BlackSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
+
+    getLeftCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.column === 7) return current;
+        return { row: current.row, column: current.column + 1 };
+    }
+
+    getRightCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.column === 0) return current;
+        return { row: current.row, column: current.column - 1 };
+    }
+
+    getUpCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.row === 7) return current;
+        return { row: current.row + 1, column: current.column };
+    }
+
+    getDownCoordinates(current: ItemPosition2D): ItemPosition2D {
+        if (current.row === 0) return current;
+        return { row: current.row - 1, column: current.column };
+    }
+
+}
+```
+
+Como se puede apreciar, ya que nuestro tablero es un componente bidimensional, utilizamos **ItemPosition2D** en lugar del tipo genérico **ItemPosition**.
+
+#### 4.2.2 - El componente ChessSquare
+
+Como hemos dicho, este componente representa cada casilla del tablero. Para cada una, tendremos que saber su posición, si tiene una pieza y cuál es en caso afirmativo, y el color de la casilla. Algunos de estos datos pueden ser calculados a partir de otros. Además, incluiremos los dos emiter de nuestra arquitectura para incorporar su comportamiento:
+
+```
+import { Component, h, Prop, Host } from '@stencil/core';
+import { ChessPieceDescription, arrayToBoardRow, arrayToBoardColumn, BoardSide, ChessPiece } from '../../utils/chess-utils';
+
+enum SquareColour { white, black }
+
+@Component({
+    tag: 'chess-square',
+    styleUrl: 'chess-square.css',
+    shadow: false
+})
+export class ChessSquare {
+
+    @Prop() row!: number;
+    @Prop() column!: number;
+    @Prop() piece?: ChessPiece;
+    @Prop() side!: BoardSide;
+
+    private getColour = (): SquareColour => {
+        if ((this.row + this.column) % 2 === 0) return SquareColour.white;
+        else return SquareColour.black;
+    }
+
+    private getAccessibleDescription = (): string => {
+        return `${arrayToBoardRow(this.row)}${arrayToBoardColumn(this.column)} - ${this.piece ? ChessPieceDescription[this.piece] : ""}`;
+    }
+
+    private isFirstSquare = (): boolean => {
+        if (this.side === BoardSide.white && this.row === 0 && this.column === 0) return true;
+        if (this.side === BoardSide.black && this.row === 7 && this.column === 7) return true;
+        return false;
+    }
+
+    render() {
+        return (
+            <Host
+                class={{
+                    "white-square": this.getColour() === SquareColour.white,
+                    "black-square": this.getColour() === SquareColour.black,
+                }}
+                role="gridcell"
+                aria-label={this.getAccessibleDescription()}
+            >
+                <focusableItem
+                    position={{ row: this.row, column: this.column }}
+                    isInTabSequence={this.isFirstSquare()}
+                >
+                    <keyboardNavigable>
+                        {this.piece}
+                    </keyboardNavigable>
+                </focusableItem>
+            </Host >
+        );
+    }
+}
+```
+
+Como vemos, la complejidad referente a la navegación y el manejo del foco ha sido incorporada con un par de etiquetas. Lo único que hace el componente es preocuparse por la representación gráfica y algunos cálculos necesarios para este caso concreto.
+
+#### 4.2.3 - Board renderers
+
+#### 4.2.4 - El componente ChessBoard
+
+
+## 6 - Conclusiones
+
