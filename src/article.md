@@ -32,9 +32,21 @@ Simple, ¿no? Quizá no tanto… Vamos a verlo con más detalle en un ejemplo. C
 
 ¡Manos a la obra! Lo primero es crear un proyecto nuevo de Stencil. Con el entorno que tenemos configurado, esto es tan simple como abrir la paleta de comandos y buscar por *Stencil*. Encontraremos el omando *start a new project*. En nuestro caso, vamos a crear directamente una aplicación web. Seguimos el pequeño asistente y, ¡ya lo tenemos listo!
 
-### 4.1 - Encapsular la navegación
+### 4.1 - Encapsular el código para reutilizar
 
-#### 4.1.1 - Valores de las teclas
+Reutilizar código es siempre una buena idea. No sólo escribimos menos, sino que es más fácil realizar test y se obtiene un producto más mantenible. Tradicionalmente, se ha utilizado la herencia de clases para reutilizar código. Sin embargo, no siempre es la mejor solución. Diferentes patrones de diseño pueden aplicarse a ciertos problemas para solventar las limitaciones que tiene el enfoque de la herencia.
+
+En nuestro caso, directamente no podemos realizar herencia entre web components. Aunque podríamos crear clases abstractas que no hicieran uso de la API de Stencil, estaríamos desaprovechando gran parte del poder que esta nos ofrece. Por tanto, debemos buscar una alternativa viable.
+
+Aquí entra en juego la composición de componentes, valga la redundancia. Igual que agrupamos los elementos HTML básicos unos dentro de otros, también podemos hacer lo mismo con los web components. La única diferencia es que nosotros vamos a aprovechar esta capacidad no sólo para crear una jerarquía y una lógica de presentación, sino que también vamos a crear "componentes de comportamiento". Estos se limitarán a encapsular una cierta funcionalidad, de modo que, al componerlos dentro de otros, otorguen sus capacidades sin necesidad de duplicar el código constantemente.
+
+Vamos a utilizar un patrón de arquitectura emiter-listener-handler. Commo veréis a continuación, es una solución que se adapta muy bien al problema. El primer componente se encarga de capturar los eventos básicos que queremos controlar y envolverlos para facilitar su escucha. El listener se encargará de escuchar los eventos del emiter. Sin embargo, no dispone de ninguna información acerca del componente concreto que estemos desarrollando. Por eso debe apoyarse en el handler, que será una implementación concreta y limitada para cada caso. De este modo, dos de los tres componentes pueden reutilizarse para cualquier otro problema similar, mientras que sólo debemos implementar una tercera parte del código y componerlo con el resto. Fantástico, ¿verdad? Vamos a ver cómo hacerlo con dos ejemplos.
+
+#### 4.1.1 - Navegación por teclado
+
+Como hemos dicho, estamos comprometidos con la accesibilidad. Vamos a crear una estructura de componentes que nos permita navegar con las teclas de dirección del teclado. Así podremos desplazar el foco por las distintas casillas del tablero de ajedrez.
+
+##### 4.1.1.1 - Valores de las teclas
 
 Lo primero que vamos a hacer es crear un *enum* con los valores que se devuelven con las pulsaciones por teclado de determinadas teclas. Así los tendremos siempre a mano y el IDE nos ayudará a autocompletar. Aquí he recogido más teclas de las que vamos a utilizar por pura comodidad. Son las que más vamos a usar para implementar navegación por teclado. Así las tendremos listas si queremos ampliar la funcionalidad.
 
@@ -59,9 +71,9 @@ export enum KeyCodes {
 }
 ```
 
-#### 4.1.2 - El componente KeyboardNavigable
+##### 4.1.1.2 - El componente KeyboardNavigable
 
-Como hemos comentado antes, vamos a crear un componente que encapsule la capacidad de navegación. Desde el explorador de proyecto, hacemos clic derecho en la carpeta *src/components* y elegimos *generate Stencil component*. Llamaremos a nuestro componente **KeyboardNavigable**. La extensión nos genera un componente ya preconfigurado. Agregamos el flag para deshabilitar shadow Dom en la anotación **@Component** de forma que sea transparente.
+Como hemos comentado antes, vamos a crear un componente emiter que envuelva los eventos de teclado. Desde el explorador de proyecto, hacemos clic derecho en la carpeta *src/components* y elegimos *generate Stencil component*. Llamaremos a nuestro componente **KeyboardNavigable**. La extensión nos genera un componente ya preconfigurado. Agregamos el flag para deshabilitar shadow Dom en la anotación **@Component** de forma que sea transparente.
 
 Vamos a agregar aquí el lanzamiento de eventos cuando se presionen las teclas que queremos manejar. Esto evitará tener que comprobar todos los eventos de teclado en el listener, de modo que será más limpio y eficiente. Para ello, utilizaremos las anotaciones **@Event** para lanzar los eventos personalizados y **@Listen** para escuchar el teclado.
 
@@ -118,14 +130,14 @@ Algunas notas sobre este componente:
 * Usamos *keyup* y no *keydown* por motivos de accesibilidad. Este evento solo se llama una vez al soltar la tecla, mientras que *keydown* puede llamarse múltiples veces durante una pulsación prolongada.
 * Utilizamos el atributo *role=none* en el elemento *Host* para que el componente sea ignorado por la capa de accesibilidad. Solo encapsula comportamiento, no queremos que se represente de ninguna forma al usuario. Esto no impide que lo que haya dentro mediante el *slot* se presente al usuario. Utilizar el atributo *aria-hidden* para ese propósito.
 
-#### 4.1.3 - La interfaz DirectionalNavigable
+##### 4.1.1.3 - La interfaz KeyboardNavigationHandler
 
 Como hemos visto, hay una infinidad de widgets que pueden requerir de la navegación por teclado. En nuestro caso, que la hemos simplificado a cuatro teclas, debemos tener una forma para que esta navegación se personalice en cada caso sin necesidad de duplicar el código.
 
-Vamos a crear una carpeta llamada *abstractions* en la que crearemos la interfaz *DirectionalNavigable*:
+Vamos a crear una carpeta llamada *abstractions* en la que crearemos la interfaz *KeyboardNavigationHandler*:
 
 ```
-export interface DirectionalNavigable {
+export interface KeyboardNavigationHandler {
     getLeftItem(): HTMLElement | undefined;
     getRightItem(): HTMLElement | undefined;
     getUpItem(): HTMLElement | undefined;
@@ -135,13 +147,13 @@ export interface DirectionalNavigable {
 
 Especificamos que el tipo retornado es HTMLElement | undefined para prevenir problemas con el tipado estricto. Si usamos tipado flexible, no es necesario, pero puede provocar errores en otros puntos del sistema.
 
-#### 4.1.4 - El componente KeyboardNavigationListener
+##### 4.1.1.4 - El componente KeyboardNavigationListener
 
 Aquí tenemos la pieza final del conjunto. Creamos un nuevo componente que actuará como listener de los eventos lanzados por **KeyboardNavigable**:
 
 ```
 import { Component, h, Prop, Host, Listen } from '@stencil/core';
-import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
+import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
 
 
 @Component({
@@ -151,29 +163,29 @@ import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
 })
 export class KeyboardNavigationListener {
 
-    @Prop() navigable!: DirectionalNavigable;
+    @Prop() handler: KeyboardNavigationHandler;
 
     @Listen('upArrow')
     protected upArrowHandler() {
-        const itemToFocus = this.navigable.getUpItem();
+        const itemToFocus = this.handler.getUpItem();
         this.focus(itemToFocus);
     }
 
     @Listen('downArrow')
     protected downArrowHandler() {
-        const itemToFocus = this.navigable.getDownItem();
+        const itemToFocus = this.handler.getDownItem();
         this.focus(itemToFocus);
     }
 
     @Listen('leftArrow')
     protected leftArrowHandler() {
-        const itemToFocus = this.navigable.getLeftItem();
+        const itemToFocus = this.handler.getLeftItem();
         this.focus(itemToFocus);
     }
 
     @Listen('rightArrow')
     protected rightArrowHandler() {
-        const itemToFocus = this.navigable.getRightItem();
+        const itemToFocus = this.handler.getRightItem();
         this.focus(itemToFocus);
     }
 
@@ -192,74 +204,125 @@ export class KeyboardNavigationListener {
 ```
 
 Algunas notas sobre el componente:
-* Contiene la propiedad **navigable** que debe ser asignada por su padre. De esta forma, podemos recuperar el elemento al que hay que desplazar el foco sin importar el contexto concreto. De eso se encarga cada widget específico.
+* Contiene la propiedad **handler** que debe ser asignada por su padre. De esta forma, podemos recuperar el elemento al que hay que desplazar el foco sin importar el contexto concreto. De eso se encarga cada widget específico.
 * Sólo hacemos foco si el valor devuelto por el padre no es *undefined*. En caso contrario, no hay acción.
 * Como **KeyboardNavigable**, el *role* del elemento *Host* es none y no tiene shadow DOM.
 
-### 4.2. - Aplicar la navegación a nuestros componentes
+#### 4.1.2 - Manejo del foco
 
-Una vez que hemos definido el sistema de navegación, vamos a implementarlo para comprobar que funciona correctamente. Para nuestro caso, tendremos dos componentes principales: ChessBoard y ChessSquare. El primero define el comportamiento general del tablero, mientras que el segundo representa una de las casillas o escaques. Veremos cómo componerlos para obtener el resultado deseado. Pero antes, vamos a necesitar unos pequeños añadidos para interpretar correctamente el tablero mediante accesibilidad.
+Hay que tener en cuenta que el foco también puede ser desplazado por el ratón. No sirve únicamente con controlar los eventos de teclado y actualizar los datos cuando estos ocurran. Por eso, debemos realizar un diseño similar para los eventos de foco cuando se desplace a uno de los items, en nuestro caso, las casillas.
 
-#### 4.2.1 - Intérprete de piezas
+##### 4.1.2.1 - El componente FocusableItem
 
-Aunque podríamos utilizar imágenes para representar las piezas en el tablero, pretendemos que este ejemplo sea lo más simple posible. Por eso, vamos a utilizar una representación textual con las iniciales de cada una. Podríamos pensar que basta con ponerlas de uno u otro color, pero ten en cuenta que, igual que las piezas son blancas o negras, las casillas también. Esto podría causar problemas de contraste.
-
-Como solución, vamos a utilizar la misma nomenclatura que la [notación FEN](https://es.wikipedia.org/wiki/Notaci%C3%B3n_de_Forsyth-Edwards). Las piezas blancas irán en mayúscula y las negras en minúscula. Para ello, vamos a crear un enum en *utils/chess-utils.ts*:
+Este será el emiter para el evento de foco. Como veis, es muy similar al *KeyboardNavigable*:
 
 ```
-export enum ChessPiece {
-    K = "White king",
-    Q = "White queen",
-    R = "White Rook",
-    B = "White bishop",
-    N = "White knight",
-    P = "White pawn",
-    k = "Black king",
-    q = "Black queen",
-    r = "Black rook",
-    b = "Black Bishop",
-    n = "Black knight",
-    p = "Black pawn"
-}
-```
+import { Component, h, Prop, Event, EventEmitter, Host, Listen } from '@stencil/core';
+import { ItemPosition } from '../../abstraction/FocusedItemHandler';
 
-Usaremos las letras como representación gráfica. Para cuestiones de accesibilidad, utilizaremos esta traducción. Bastará con utilizar el enum como si fuera un objeto, pasando como clave la inicial.
 
-#### 4.2.2 - Intérprete de casillas
+@Component({
+    tag: 'focusable-item',
+    styleUrl: 'focusable-item.css',
+    shadow: false
+})
+export class FocusableItem {
 
-Seguro que alguna vez has visto un tablero de ajedrez y te han llamado la atención las letras y los números que se sitúan en los bordes. Aunque podrían usarse para jugar al Hundir la flota, el propósito es identificar de forma unívoca cada casilla del tablero. Aunque existen diferentes notaciones para expresar los movimientos en ajedrez, la más extendida es la [notación algebraica](https://es.wikipedia.org/wiki/Notaci%C3%B3n_algebraica). En esta se identifican las casillas con el par letra-número. Para trasladar esto a nuestro ámbito, debemos tener en cuenta dos cosas:
+    @Prop() isInTabSequence: boolean = false;
+    @Prop() position!: ItemPosition;
+    @Event() focusedItem: EventEmitter<ItemPosition>;
 
-* El modelo del tablero lo representaremos como una matriz bidimensional. Las matrices admiten como argumentos en sus posiciones números, no letras.`Además, empiezan en 0, no en 1.
-* El tablero empieza con la posición A1 en la esquina inferior izquierda y termina en H8 en la esquina superior derecha. Eso siempre que se represente del lado de las blancas.
+    @Listen('focus')
+    protected focusHandler() {
+        this.focusedItem.emit(this.position);
+    }
 
-Parece evidente que necesitamos una forma de traducir de un sistema al otro, de forma que podamos trabajar de manera transparente. Así que, vamos a añadir algunas cosas más a nuestro archivo *utils/chess-utils.ts*:
-
-```
-export enum BoardSide { white, black }
-
-export function arrayToBoardColumn(col: number): string | undefined {
-    switch (col) {
-        case 0: return "A";
-        case 1: return "B";
-        case 2: return "C";
-        case 3: return "D";
-        case 4: return "E";
-        case 5: return "F";
-        case 6: return "G";
-        case 7: return "H";
+    render() {
+        return (
+            <Host
+                tabindex={this.isInTabSequence ? 0 : -1}
+            >
+                <slot />
+            </Host>
+        );
     }
 }
+```
 
-export function arrayToBoardRow(row: number): number | undefined {
-    if (row >= 0 && row <= 7) {
-        return 8 - row;
-    }
-    else return undefined;
+Algunas notas sobre este componente:
+* La Propiedad isInTabSequence se utiliza para determinar si el componente se debe incluir en la secuencia del tabulador. Como Normalmente no nos interesa, la ponemos por defecto a false. Sin embargo, puede ser útil incluirla en el primer componente hijo para que podamos empezar a desplazar el foco con las flechas a partir de él.
+* En este caso, el evento que emitimos lleva asociada la posición del item. Este dato puede ser interesante para el conocimiento del padre. A continuación veremos cómo usarla.
+
+##### 4.1.2.2 - FocusedItemHandler
+
+Como con la navegación de teclado, vamos a crear una interfaz que actúe de handler y que se implemente en cada caso concreto. Lo único que hará en este caso será recibir notificaciones de cambio de foco con la posición del elemento enfocado. Debemos tener en cuenta que nuestros componentes pueden ser de varias dimensiones distintas. Nuestro tablero tiene dos dimensiones, pero un menú tiene una y un gráfico SVG que emule un entorno puede tener tres. Aprovecharemos la potencia que nos ofrece TypeScript para lidiar con este asunto y proporcionar un componente que permita trabajar con todos los casos:
+
+```
+export type ItemPosition = ItemPosition1D | ItemPosition2D | ItemPosition3D;
+
+export interface ItemPosition1D {
+    index: number;
+}
+
+export interface ItemPosition2D {
+    row: number;
+    column: number;
+}
+
+export interface ItemPosition3D {
+    row: number;
+    column: number;
+    level: number;
+}
+
+export interface FocusedItemHandler {
+    notifyFocusedItem(position: ItemPosition);
+}
+
+export function isPosition1D(position: ItemPosition): position is ItemPosition1D {
+    return (position as ItemPosition1D).index !== undefined;
+}
+
+export function isPosition2D(position: ItemPosition): position is ItemPosition2D {
+    return (position as ItemPosition2D).row !== undefined && (position as ItemPosition2D).column !== undefined;
+}
+
+export function isPosition3D(position: ItemPosition): position is ItemPosition3D {
+    return (position as ItemPosition3D).row !== undefined && (position as ItemPosition3D).column !== undefined && (position as ItemPosition3D).level !== undefined;
 }
 ```
 
-Con esto, ya estamos listos para crear los componentes.
+Hemos definido que el tipo **ItemPosition** es la unión de los tres casos que podemos encontrarnos. Además, ofrecemos funciones de type guarding para poder trabajar cómodamente con ellas.
 
-#### 4.2.3 - El componente ChessSquare
+##### 4.1.2.3 - El componente FocusedItemListener
 
-Este componente representa la mínima unidad del tablero. En él almacenaremos los datos para su representación, incluida la pieza, si la hubiera. Además, añadiremos el componente **KeyboardNavigable**:
+Ya sólo nos queda implementar el listener para el manejo del foco. No hay ucho que comentar al respecto. Como antes, este componente se apoya en el handler:
+
+```
+import { Component, h, Host, Prop, Listen } from '@stencil/core';
+import { FocusedItemHandler, ItemPosition } from '../../abstraction/FocusedItemHandler';
+
+
+@Component({
+    tag: 'focused-item-listener',
+    styleUrl: 'focused-item-listener.css',
+    shadow: false
+})
+export class FocusedItemListener {
+
+    @Prop() handler!: FocusedItemHandler;
+
+    @Listen('focusedItem')
+    protected focusedItemHandler(event: CustomEvent<ItemPosition>) {
+        this.handler.notifyFocusedItem(event.detail);
+    }
+
+    render() {
+        return (
+            <Host role="none">
+                <slot />
+            </Host>
+        );
+    }
+}
+```
