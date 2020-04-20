@@ -1,13 +1,15 @@
 {
-  "name": "Stencil Starter",
-  "short_name": "Stencil",
+  "name": "Chessboard",
+  "short_name": "Chessboard",
   "start_url": "/",
   "display": "standalone",
-  "icons": [{
-    "src": "assets/icon/icon.png",
-    "sizes": "512x512",
-    "type": "image/png"
-  }],
+  "icons": [
+    {
+      "src": "assets/icon/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
   "background_color": "#16161d",
   "theme_color": "#16161d"
 }
