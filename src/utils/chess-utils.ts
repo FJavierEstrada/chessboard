@@ -1,3 +1,4 @@
+import { ItemPosition2D } from "../abstraction/FocusedItemHandler";
 
 export type ChessPiece = "K" | "Q" | "R" | "B" | "N" | "P" | "k" | "q" | "r" | "b" | "n" | "p" | null;
 
@@ -22,11 +23,6 @@ export enum ChessPieceDescription {
 
 export enum BoardSide { white, black }
 
-export interface SquareCoordinates {
-    row: number;
-    column: number;
-}
-
 export function arrayToBoardColumn(col: number): string | undefined {
     switch (col) {
         case 0: return "A";
@@ -48,30 +44,30 @@ export function arrayToBoardRow(row: number): number | undefined {
 }
 
 export interface DirectionalNavigabilityStrategy {
-    getLeftCoordinates(current: SquareCoordinates): SquareCoordinates;
-    getRightCoordinates(current: SquareCoordinates): SquareCoordinates;
-    getUpCoordinates(current: SquareCoordinates): SquareCoordinates;
-    getDownCoordinates(current: SquareCoordinates): SquareCoordinates;
+    getLeftCoordinates(current: ItemPosition2D): ItemPosition2D;
+    getRightCoordinates(current: ItemPosition2D): ItemPosition2D;
+    getUpCoordinates(current: ItemPosition2D): ItemPosition2D;
+    getDownCoordinates(current: ItemPosition2D): ItemPosition2D;
 }
 
 export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
 
-    getLeftCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getLeftCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.column === 0) return current;
         return { row: current.row, column: current.column - 1 };
     }
 
-    getRightCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getRightCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.column === 7) return current;
         return { row: current.row, column: current.column + 1 };
     }
 
-    getUpCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getUpCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.row === 0) return current;
         return { row: current.row - 1, column: current.column };
     }
 
-    getDownCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getDownCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.row === 7) return current;
         return { row: current.row + 1, column: current.column };
     }
@@ -80,22 +76,22 @@ export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStr
 
 export class BlackSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
 
-    getLeftCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getLeftCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.column === 7) return current;
         return { row: current.row, column: current.column + 1 };
     }
 
-    getRightCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getRightCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.column === 0) return current;
         return { row: current.row, column: current.column - 1 };
     }
 
-    getUpCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getUpCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.row === 7) return current;
         return { row: current.row + 1, column: current.column };
     }
 
-    getDownCoordinates(current: SquareCoordinates): SquareCoordinates {
+    getDownCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.row === 0) return current;
         return { row: current.row - 1, column: current.column };
     }

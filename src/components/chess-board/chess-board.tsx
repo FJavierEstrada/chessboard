@@ -1,7 +1,8 @@
-import { Component, h, Prop, State, Listen, Watch, Host } from '@stencil/core';
-import { BoardSide, SquareCoordinates, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel, BoardView } from '../../utils/chess-utils';
-import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
+import { Component, h, Prop, State, Watch, Host } from '@stencil/core';
+import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel, BoardView } from '../../utils/chess-utils';
 import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
+import { FocusedItemHandler, ItemPosition, ItemPosition2D, isPosition2D } from '../../abstraction/FocusedItemHandler';
+import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
 
 
 @Component({
@@ -9,14 +10,14 @@ import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRend
     styleUrl: 'chess-board.css',
     shadow: true
 })
-export class ChessBoard implements DirectionalNavigable {
+export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler {
 
     @Prop() side: BoardSide = BoardSide.white;
 
     @State() boardModel: BoardModel;
 
 
-    private focusedSquare: SquareCoordinates;
+    private focusedSquare: ItemPosition2D;
     private boardView: BoardView;
     private navigabilityStrategy: DirectionalNavigabilityStrategy;
     private boardRenderer: BoardRenderer;
@@ -24,11 +25,6 @@ export class ChessBoard implements DirectionalNavigable {
     @Watch('side')
     sideChanged(newSide: BoardSide) {
         this.setNavigationAndRenderStrategies(newSide);
-    }
-
-    @Listen('squareFocused')
-    protected squareFocusedHandler(event: CustomEvent<SquareCoordinates>) {
-        this.focusedSquare = event.detail;
     }
 
     componentWillLoad() {
@@ -60,17 +56,25 @@ export class ChessBoard implements DirectionalNavigable {
         return this.boardView[downCoordinates.row][downCoordinates.column];
     }
 
+    notifyFocusedItem(position: ItemPosition) {
+        if (isPosition2D(position)) {
+            this.focusedSquare = position;
+        }
+    }
+
     render() {
         return (
             <Host role="application">
-                <keyboardNavigationListener navigable={this}>
-                    {this.boardView.map((row: HTMLElement[]) => {
-                        row.map((square: HTMLElement) => square);
-                    })
-                    }
-                    {this.boardRenderer.renderRowHeader()}
-                    {this.boardRenderer.renderColumnHeader()}
-                </keyboardNavigationListener>
+                <focusedItemListener handler={this}>
+                    <keyboardNavigationListener handler={this}>
+                        {this.boardView.map((row: HTMLElement[]) => {
+                            row.map((square: HTMLElement) => square);
+                        })
+                        }
+                        {this.boardRenderer.renderRowHeader()}
+                        {this.boardRenderer.renderColumnHeader()}
+                    </keyboardNavigationListener>
+                </focusedItemListener>
             </Host>
         );
     }

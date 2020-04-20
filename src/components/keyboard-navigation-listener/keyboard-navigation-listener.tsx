@@ -1,5 +1,5 @@
 import { Component, h, Prop, Host, Listen } from '@stencil/core';
-import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
+import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
 
 
 @Component({
@@ -9,29 +9,29 @@ import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
 })
 export class KeyboardNavigationListener {
 
-    @Prop() navigable!: DirectionalNavigable;
+    @Prop() handler: KeyboardNavigationHandler;
 
     @Listen('upArrow')
     protected upArrowHandler() {
-        const itemToFocus = this.navigable.getUpItem();
+        const itemToFocus = this.handler.getUpItem();
         this.focus(itemToFocus);
     }
 
     @Listen('downArrow')
     protected downArrowHandler() {
-        const itemToFocus = this.navigable.getDownItem();
+        const itemToFocus = this.handler.getDownItem();
         this.focus(itemToFocus);
     }
 
     @Listen('leftArrow')
     protected leftArrowHandler() {
-        const itemToFocus = this.navigable.getLeftItem();
+        const itemToFocus = this.handler.getLeftItem();
         this.focus(itemToFocus);
     }
 
     @Listen('rightArrow')
     protected rightArrowHandler() {
-        const itemToFocus = this.navigable.getRightItem();
+        const itemToFocus = this.handler.getRightItem();
         this.focus(itemToFocus);
     }
 

@@ -1,4 +1,4 @@
-export interface DirectionalNavigable {
+export interface KeyboardNavigationHandler {
     getLeftItem(): HTMLElement | undefined;
     getRightItem(): HTMLElement | undefined;
     getUpItem(): HTMLElement | undefined;

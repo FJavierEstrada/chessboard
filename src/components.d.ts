@@ -6,8 +6,9 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { MatchResults, } from "@stencil/router";
-import { BoardSide, ChessPiece, SquareCoordinates, } from "./utils/chess-utils";
-import { DirectionalNavigable, } from "./abstraction/DirectionalNavigable";
+import { BoardSide, ChessPiece, } from "./utils/chess-utils";
+import { FocusedItemHandler, ItemPosition, } from "./abstraction/FocusedItemHandler";
+import { KeyboardNavigationHandler, } from "./abstraction/KeyboardNavigationHandler";
 export namespace Components {
     interface AppHome {
     }
@@ -25,10 +26,17 @@ export namespace Components {
         "row": number;
         "side": BoardSide;
     }
+    interface FocusableItem {
+        "isInTabSequence": boolean;
+        "position": ItemPosition;
+    }
+    interface FocusedItemListener {
+        "handler": FocusedItemHandler;
+    }
     interface KeyboardNavigable {
     }
     interface KeyboardNavigationListener {
-        "navigable": DirectionalNavigable;
+        "handler": KeyboardNavigationHandler;
     }
 }
 declare global {
@@ -62,6 +70,18 @@ declare global {
         prototype: HTMLChessSquareElement;
         new (): HTMLChessSquareElement;
     };
+    interface HTMLFocusableItemElement extends Components.FocusableItem, HTMLStencilElement {
+    }
+    var HTMLFocusableItemElement: {
+        prototype: HTMLFocusableItemElement;
+        new (): HTMLFocusableItemElement;
+    };
+    interface HTMLFocusedItemListenerElement extends Components.FocusedItemListener, HTMLStencilElement {
+    }
+    var HTMLFocusedItemListenerElement: {
+        prototype: HTMLFocusedItemListenerElement;
+        new (): HTMLFocusedItemListenerElement;
+    };
     interface HTMLKeyboardNavigableElement extends Components.KeyboardNavigable, HTMLStencilElement {
     }
     var HTMLKeyboardNavigableElement: {
@@ -80,6 +100,8 @@ declare global {
         "app-root": HTMLAppRootElement;
         "chess-board": HTMLChessBoardElement;
         "chess-square": HTMLChessSquareElement;
+        "focusable-item": HTMLFocusableItemElement;
+        "focused-item-listener": HTMLFocusedItemListenerElement;
         "keyboard-navigable": HTMLKeyboardNavigableElement;
         "keyboard-navigation-listener": HTMLKeyboardNavigationListenerElement;
     }
@@ -97,10 +119,17 @@ declare namespace LocalJSX {
     }
     interface ChessSquare {
         "column": number;
-        "onSquareFocused"?: (event: CustomEvent<SquareCoordinates>) => void;
         "piece"?: ChessPiece;
         "row": number;
         "side": BoardSide;
+    }
+    interface FocusableItem {
+        "isInTabSequence"?: boolean;
+        "onFocusedItem"?: (event: CustomEvent<ItemPosition>) => void;
+        "position": ItemPosition;
+    }
+    interface FocusedItemListener {
+        "handler": FocusedItemHandler;
     }
     interface KeyboardNavigable {
         "onDownArrow"?: (event: CustomEvent<any>) => void;
@@ -109,7 +138,7 @@ declare namespace LocalJSX {
         "onUpArrow"?: (event: CustomEvent<any>) => void;
     }
     interface KeyboardNavigationListener {
-        "navigable": DirectionalNavigable;
+        "handler"?: KeyboardNavigationHandler;
     }
     interface IntrinsicElements {
         "app-home": AppHome;
@@ -117,6 +146,8 @@ declare namespace LocalJSX {
         "app-root": AppRoot;
         "chess-board": ChessBoard;
         "chess-square": ChessSquare;
+        "focusable-item": FocusableItem;
+        "focused-item-listener": FocusedItemListener;
         "keyboard-navigable": KeyboardNavigable;
         "keyboard-navigation-listener": KeyboardNavigationListener;
     }
@@ -130,6 +161,8 @@ declare module "@stencil/core" {
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
             "chess-board": LocalJSX.ChessBoard & JSXBase.HTMLAttributes<HTMLChessBoardElement>;
             "chess-square": LocalJSX.ChessSquare & JSXBase.HTMLAttributes<HTMLChessSquareElement>;
+            "focusable-item": LocalJSX.FocusableItem & JSXBase.HTMLAttributes<HTMLFocusableItemElement>;
+            "focused-item-listener": LocalJSX.FocusedItemListener & JSXBase.HTMLAttributes<HTMLFocusedItemListenerElement>;
             "keyboard-navigable": LocalJSX.KeyboardNavigable & JSXBase.HTMLAttributes<HTMLKeyboardNavigableElement>;
             "keyboard-navigation-listener": LocalJSX.KeyboardNavigationListener & JSXBase.HTMLAttributes<HTMLKeyboardNavigationListenerElement>;
         }

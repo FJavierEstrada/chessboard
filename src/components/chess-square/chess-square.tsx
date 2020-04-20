@@ -1,12 +1,12 @@
-import { Component, h, Prop, Host, Listen, Event, EventEmitter } from '@stencil/core';
-import { ChessPieceDescription, arrayToBoardRow, arrayToBoardColumn, BoardSide, SquareCoordinates, ChessPiece } from '../../utils/chess-utils';
+import { Component, h, Prop, Host } from '@stencil/core';
+import { ChessPieceDescription, arrayToBoardRow, arrayToBoardColumn, BoardSide, ChessPiece } from '../../utils/chess-utils';
 
 enum SquareColour { white, black }
 
 @Component({
     tag: 'chess-square',
     styleUrl: 'chess-square.css',
-    shadow: true
+    shadow: false
 })
 export class ChessSquare {
 
@@ -14,13 +14,6 @@ export class ChessSquare {
     @Prop() column!: number;
     @Prop() piece?: ChessPiece;
     @Prop() side!: BoardSide;
-
-    @Event() squareFocused: EventEmitter<SquareCoordinates>;
-
-    @Listen('focus')
-    protected focusHandler() {
-        this.squareFocused.emit({ row: this.row, column: this.column });
-    }
 
     private getColour = (): SquareColour => {
         if ((this.row + this.column) % 2 === 0) return SquareColour.white;
@@ -45,12 +38,16 @@ export class ChessSquare {
                     "black-square": this.getColour() === SquareColour.black,
                 }}
                 role="gridcell"
-                tabindex={this.isFirstSquare ? 0 : -1}
                 aria-label={this.getAccessibleDescription()}
             >
-                <keyboardNavigable>
-                    {this.piece}
-                </keyboardNavigable>
+                <focusableItem
+                    position={{ row: this.row, column: this.column }}
+                    isInTabSequence={this.isFirstSquare()}
+                >
+                    <keyboardNavigable>
+                        {this.piece}
+                    </keyboardNavigable>
+                </focusableItem>
             </Host >
         );
     }
