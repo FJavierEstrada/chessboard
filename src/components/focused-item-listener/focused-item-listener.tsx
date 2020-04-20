@@ -13,6 +13,7 @@ export class FocusedItemListener {
 
     @Listen('focusedItem')
     protected focusedItemHandler(event: CustomEvent<ItemPosition>) {
+        event.stopPropagation();
         this.handler.notifyFocusedItem(event.detail);
     }
 
