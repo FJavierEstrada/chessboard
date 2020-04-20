@@ -1,7 +1,6 @@
 import { Component, h, Prop, State, Listen, Watch, Host } from '@stencil/core';
 import { BoardSide, SquareCoordinates, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel, BoardView } from '../../utils/chess-utils';
 import { DirectionalNavigable } from '../../abstraction/DirectionalNavigable';
-import { KeyboardNavigationListener } from '../keyboard-navigation-listener/keyboard-navigation-listener';
 import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
 
 
@@ -64,14 +63,14 @@ export class ChessBoard implements DirectionalNavigable {
     render() {
         return (
             <Host role="application">
-                <KeyboardNavigationListener navigable={this}>
-                    {this.boardView.forEach((row: HTMLElement[]) => {
-                        row.forEach((square: HTMLElement) => square);
+                <keyboardNavigationListener navigable={this}>
+                    {this.boardView.map((row: HTMLElement[]) => {
+                        row.map((square: HTMLElement) => square);
                     })
                     }
                     {this.boardRenderer.renderRowHeader()}
                     {this.boardRenderer.renderColumnHeader()}
-                </KeyboardNavigationListener>
+                </keyboardNavigationListener>
             </Host>
         );
     }

@@ -1,6 +1,5 @@
 import { Component, h, Prop, Host, Listen, Event, EventEmitter } from '@stencil/core';
 import { ChessPieceDescription, arrayToBoardRow, arrayToBoardColumn, BoardSide, SquareCoordinates, ChessPiece } from '../../utils/chess-utils';
-import { KeyboardNavigable } from '../keyboard-navigable/keyboard-navigable';
 
 enum SquareColour { white, black }
 
@@ -49,9 +48,9 @@ export class ChessSquare {
                 tabindex={this.isFirstSquare ? 0 : -1}
                 aria-label={this.getAccessibleDescription()}
             >
-                <KeyboardNavigable>
+                <keyboardNavigable>
                     {this.piece}
-                </KeyboardNavigable>
+                </keyboardNavigable>
             </Host >
         );
     }

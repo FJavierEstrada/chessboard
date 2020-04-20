@@ -1,11 +1,10 @@
 import { h } from '@stencil/core';
 import { BoardModel, BoardView, ChessPiece, BoardSide, arrayToBoardColumn, arrayToBoardRow } from "../../utils/chess-utils";
-import { ChessSquare } from "../chess-square/chess-square";
 
 export interface BoardRenderer {
     renderBoard(model: BoardModel): BoardView;
-    renderRowHeader(): HTMLElement[];
-    renderColumnHeader(): HTMLElement[];
+    renderRowHeader(): HTMLElement;
+    renderColumnHeader(): HTMLElement;
 }
 
 export class WhiteSideRenderer implements BoardRenderer {
@@ -16,7 +15,7 @@ export class WhiteSideRenderer implements BoardRenderer {
             const rowView: HTMLElement[] = [];
             row.forEach((square: ChessPiece, j: number) => {
                 rowView.push(
-                    <ChessSquare
+                    <chessSquare
                         row={i}
                         column={j}
                         piece={square}
@@ -29,28 +28,36 @@ export class WhiteSideRenderer implements BoardRenderer {
         return view;
     }
 
-    renderColumnHeader(): HTMLElement[] {
-        const colHeaders: HTMLElement[] = [];
-        for (let i = 0; i < 8; i++) {
-            colHeaders.push(
-                <div class="col-header">
-                    {arrayToBoardColumn(i)}
-                </div>
-            );
-        }
-        return colHeaders;
+    renderColumnHeader(): HTMLElement {
+        const cols = Array.from(Array(8).keys());
+        return (
+            <div class="col-headers">
+                {cols.map((i: number) => {
+                    return (
+                        <div class="col-header">
+                            {arrayToBoardColumn(i)}
+                        </div>
+                    );
+                })
+                }
+            </div>
+        );
     }
 
-    renderRowHeader(): HTMLElement[] {
-        const rowHeaders: HTMLElement[] = [];
-        for (let i = 0; i < 8; i++) {
-            rowHeaders.push(
-                <div class="row-header">
-                    {arrayToBoardRow(i)}
-                </div>
-            );
-        }
-        return rowHeaders;
+    renderRowHeader(): HTMLElement {
+        const rows = Array.from(Array(8).keys());
+        return (
+            <div class="row-headers">
+                {rows.map((i: number) => {
+                    return (
+                        <div class="row-header">
+                            {arrayToBoardRow(i)}
+                        </div>
+                    );
+                })
+                }
+            </div>
+        );
     }
 
 }
@@ -63,7 +70,7 @@ export class BlackSideRenderer implements BoardRenderer {
             const rowView: HTMLElement[] = [];
             row.reverse().forEach((square: ChessPiece, j: number) => {
                 rowView.push(
-                    <ChessSquare
+                    <chessSquare
                         row={7 - i}
                         column={7 - j}
                         piece={square}
@@ -76,28 +83,36 @@ export class BlackSideRenderer implements BoardRenderer {
         return view;
     }
 
-    renderColumnHeader(): HTMLElement[] {
-        const colHeaders: HTMLElement[] = [];
-        for (let i = 7; i >= 0; i--) {
-            colHeaders.push(
-                <div class="col-header">
-                    {arrayToBoardColumn(i)}
-                </div>
-            );
-        }
-        return colHeaders;
+    renderColumnHeader(): HTMLElement {
+        const cols = Array.from(Array(8).keys());
+        return (
+            <div>
+                {cols.forEach((i: number) => {
+                    return (
+                        <div class="col-header">
+                            {arrayToBoardColumn(i)}
+                        </div>
+                    );
+                })
+                }
+            </div>
+        );
     }
 
-    renderRowHeader(): HTMLElement[] {
-        const rowHeaders: HTMLElement[] = [];
-        for (let i = 7; i >= 0; i--) {
-            rowHeaders.push(
-                <div class="row-header">
-                    {arrayToBoardRow(i)}
-                </div>
-            );
-        }
-        return rowHeaders;
+    renderRowHeader(): HTMLElement {
+        const rows = Array.from(Array(8).keys());
+        return (
+            <div>
+                {rows.forEach((i: number) => {
+                    return (
+                        <div class="row-header">
+                            {arrayToBoardRow(i)}
+                        </div>
+                    );
+                })
+                }
+            </div>
+        );
     }
 
 }
