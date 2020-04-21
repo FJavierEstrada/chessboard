@@ -7,5 +7,5 @@ describe('chess-board', () => {
     await page.setContent('<chess-board></chess-board>');
     const element = await page.find('chess-board');
     expect(element).toHaveClass('hydrated');
-  });{cursor}
+  });
 });

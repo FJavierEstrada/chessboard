@@ -11,7 +11,14 @@
     "generate": "stencil generate"
   },
   "devDependencies": {
-    "@stencil/core": "^1.12.3"
+    "@stencil/core": "^1.12.3",
+    "@types/puppeteer": "2.0.1",
+    "jest": "24.9.0",
+    "jest-cli": "24.9.0",
+    "puppeteer": "2.1.1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/jest": "^25.2.1"
+  }
 }

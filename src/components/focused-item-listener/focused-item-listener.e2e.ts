@@ -7,5 +7,5 @@ describe('focused-item-listener', () => {
     await page.setContent('<focused-item-listener></focused-item-listener>');
     const element = await page.find('focused-item-listener');
     expect(element).toHaveClass('hydrated');
-  });{cursor}
+  });
 });
