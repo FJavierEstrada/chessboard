@@ -28,8 +28,11 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     }
 
     componentWillLoad() {
+        console.log("Init will load.");
         this.setNavigationAndRenderStrategies(this.side);
+        console.log("Setted navigation and rendering strategy");
         this.boardModel = this.generateDefaultPosition();
+        console.log("Generated default position.");
     }
 
     componentWillRender() {
@@ -64,17 +67,19 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
 
     render() {
         return (
-            <Host role="application">
-                <focusedItemListener handler={this}>
-                    <keyboardNavigationListener handler={this}>
-                        {this.boardView.map((row: HTMLElement[]) => {
-                            row.map((square: HTMLElement) => square);
-                        })
-                        }
-                        {this.boardRenderer.renderRowHeader()}
-                        {this.boardRenderer.renderColumnHeader()}
-                    </keyboardNavigationListener>
-                </focusedItemListener>
+            <Host role="grid">
+                <div>
+                    <focusedItemListener handler={this}>
+                        <keyboardNavigationListener handler={this}>
+                            {this.boardView.map((row: HTMLElement[]) => {
+                                row.map((square: HTMLElement) => square);
+                            })
+                            }
+                            {this.boardRenderer.renderRowHeader()}
+                            {this.boardRenderer.renderColumnHeader()}
+                        </keyboardNavigationListener>
+                    </focusedItemListener>
+                </div>
             </Host>
         );
     }

@@ -1,6 +1,7 @@
 chess-square {
-    height: 3em;
-    width: 3em;
+    font-size: 2rem;
+    text-align: center;
+    vertical-align: middle;
     border: 0px;
 }
 
