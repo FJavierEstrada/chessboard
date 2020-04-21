@@ -68,18 +68,18 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     render() {
         return (
             <Host role="grid">
-                <div>
-                    <focusedItemListener handler={this}>
-                        <keyboardNavigationListener handler={this}>
+                <focusedItemListener handler={this}>
+                    <keyboardNavigationListener handler={this}>
+                        <div class="board">
                             {this.boardView.map((row: HTMLElement[]) => {
                                 row.map((square: HTMLElement) => square);
                             })
                             }
-                            {this.boardRenderer.renderRowHeader()}
-                            {this.boardRenderer.renderColumnHeader()}
-                        </keyboardNavigationListener>
-                    </focusedItemListener>
-                </div>
+                        </div>
+                        {this.boardRenderer.renderRowHeader()}
+                        {this.boardRenderer.renderColumnHeader()}
+                    </keyboardNavigationListener>
+                </focusedItemListener>
             </Host>
         );
     }

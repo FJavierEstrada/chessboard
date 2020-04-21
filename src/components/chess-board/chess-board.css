@@ -1,16 +1,41 @@
 :host {
     display: grid;
-    grid-template-columns: 3rem repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr) 3rem;
-    column-gap: 0px;
-    row-gap: 0px;
-
+    grid-template-columns: 3em 1fr;
+    grid-template-rows: 1fr 3rem;
+    grid-gap: 0px;
+    grid-template-areas:
+        "rowheaders board"
+        ". colheaders";
 
     height: 43rem;
     width: 43rem;
     margin: 2 em;
     padding: 2em;
     background-color: #DEB887;
+}
+
+.col-headers {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: 1fr;
+    grid-gap: 0px;
+    grid-area: colheaders;
+}
+
+.row-headers {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(8, 1fr);
+    grid-gap: 0px;
+    grid-area: rowheaders;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    grid-gap: 0px;
+    grid-area: board;
 }
 
 .col-header {
