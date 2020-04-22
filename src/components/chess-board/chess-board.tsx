@@ -1,5 +1,5 @@
-import { Component, h, Prop, State, Watch, Host } from '@stencil/core';
-import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel, BoardView } from '../../utils/chess-utils';
+import { Component, h, Prop, State, Watch, Host, Element } from '@stencil/core';
+import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel } from '../../utils/chess-utils';
 import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
 import { FocusedItemHandler, ItemPosition, ItemPosition2D, isPosition2D } from '../../abstraction/FocusedItemHandler';
 import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
@@ -16,9 +16,9 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
 
     @State() boardModel: BoardModel;
 
+    @Element() element: HTMLElement;
 
     private focusedSquare: ItemPosition2D;
-    private boardView: BoardView;
     private navigabilityStrategy: DirectionalNavigabilityStrategy;
     private boardRenderer: BoardRenderer;
 
@@ -32,28 +32,28 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
         this.boardModel = this.generateDefaultPosition();
     }
 
-    componentWillRender() {
-        this.boardView = this.boardRenderer.renderBoard(this.boardModel);
-    }
-
     getLeftItem(): HTMLElement {
         const leftCoordinates = this.navigabilityStrategy.getLeftCoordinates(this.focusedSquare);
-        return this.boardView[leftCoordinates.row][leftCoordinates.column].querySelector("focusable-item") as HTMLElement;
+        const square = this.getSquareToFocus(leftCoordinates);
+        return square.querySelector("focusable-item") as HTMLElement;
     }
 
     getRightItem(): HTMLElement {
         const RightCoordinates = this.navigabilityStrategy.getRightCoordinates(this.focusedSquare);
-        return this.boardView[RightCoordinates.row][RightCoordinates.column].querySelector("focusable-item") as HTMLElement;
+        const square = this.getSquareToFocus(RightCoordinates);
+        return square.querySelector("focusable-item") as HTMLElement;
     }
 
     getUpItem(): HTMLElement {
         const upCoordinates = this.navigabilityStrategy.getUpCoordinates(this.focusedSquare);
-        return this.boardView[upCoordinates.row][upCoordinates.column].querySelector("focusable-item") as HTMLElement;
+        const square = this.getSquareToFocus(upCoordinates);
+        return square.querySelector("focusable-item") as HTMLElement;
     }
 
     getDownItem(): HTMLElement {
         const downCoordinates = this.navigabilityStrategy.getDownCoordinates(this.focusedSquare);
-        return this.boardView[downCoordinates.row][downCoordinates.column].querySelector("focusable-item") as HTMLElement;
+        const square = this.getSquareToFocus(downCoordinates);
+        return square.querySelector("focusable-item") as HTMLElement;
     }
 
     notifyFocusedItem(position: ItemPosition) {
@@ -72,15 +72,15 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
                                 {this.boardRenderer.renderCharacters()}
                             </div>
 
-                            {this.boardView.map((row: HTMLElement[], index: number) => {
+                            {this.boardRenderer.renderBoard(this.boardModel).map((row: HTMLElement[], index: number) => {
                                 return (
                                     <div class="row">
                                         <div class="number">
-                                            {index}
+                                            {this.boardRenderer.renderNumber(index)}
                                         </div>
                                         {row}
                                         <div class="number">
-                                            {index}
+                                            {this.boardRenderer.renderNumber(index)}
                                         </div>
                                     </div>
                                 )
@@ -125,6 +125,11 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
             this.navigabilityStrategy = new BlackSideNavigabilityStrategy();
             this.boardRenderer = new BlackSideRenderer();
         }
+    }
+
+    private getSquareToFocus(position: ItemPosition2D): HTMLElement {
+        const squareCollection = (this.element.shadowRoot as ShadowRoot).querySelectorAll("chess-square");
+        return squareCollection.item(this.navigabilityStrategy.translateCoordinatesToOneDimension(position)) as HTMLElement;
     }
 
 }

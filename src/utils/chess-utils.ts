@@ -48,6 +48,7 @@ export interface DirectionalNavigabilityStrategy {
     getRightCoordinates(current: ItemPosition2D): ItemPosition2D;
     getUpCoordinates(current: ItemPosition2D): ItemPosition2D;
     getDownCoordinates(current: ItemPosition2D): ItemPosition2D;
+    translateCoordinatesToOneDimension(position: ItemPosition2D): number;
 }
 
 export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
@@ -72,6 +73,10 @@ export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStr
         return { row: current.row + 1, column: current.column };
     }
 
+    translateCoordinatesToOneDimension(position: ItemPosition2D): number {
+        return position.row * 8 + position.column;
+    }
+
 }
 
 export class BlackSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
@@ -94,6 +99,10 @@ export class BlackSideNavigabilityStrategy implements DirectionalNavigabilityStr
     getDownCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.row === 0) return current;
         return { row: current.row - 1, column: current.column };
+    }
+
+    translateCoordinatesToOneDimension(position: ItemPosition2D): number {
+        return 63 - (position.row * 8 + position.column);
     }
 
 }
