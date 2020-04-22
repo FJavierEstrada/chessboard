@@ -15,11 +15,11 @@ describe('keyboard-navigable', () => {
 
     await page.setContent('<keyboard-navigable></keyboard-navigable>');
     const element = await page.find('keyboard-navigable');
-    const spyEvent = await element.spyOnEvent("leftArrow");
+    const spyEvent = await element.spyOnEvent("upArrow");
 
-    await element.press(KeyCodes.LEFT);
+    await element.press(KeyCodes.UP);
 
-    expect(spyEvent).toHaveReceivedEvent();
+    expect(spyEvent).toHaveReceivedEventTimes(1);
   });
 
 });

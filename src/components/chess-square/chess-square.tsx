@@ -21,7 +21,7 @@ export class ChessSquare {
     }
 
     private getAccessibleDescription = (): string => {
-        return `${arrayToBoardRow(this.row)}${arrayToBoardColumn(this.column)} - ${this.piece ? ChessPieceDescription[this.piece] : ""}`;
+        return `${arrayToBoardColumn(this.column)}${arrayToBoardRow(this.row)} - ${this.piece ? ChessPieceDescription[this.piece] : ""}`;
     }
 
     private isFirstSquare = (): boolean => {
@@ -37,17 +37,19 @@ export class ChessSquare {
                     "white-square": this.getColour() === SquareColour.white,
                     "black-square": this.getColour() === SquareColour.black,
                 }}
-                role="gridcell"
+                role="button"
                 aria-label={this.getAccessibleDescription()}
             >
-                <focusableItem
-                    position={{ row: this.row, column: this.column }}
-                    isInTabSequence={this.isFirstSquare()}
-                >
-                    <keyboardNavigable>
-                        {this.piece}
-                    </keyboardNavigable>
-                </focusableItem>
+                <keyboard-navigable>
+                    <focusable-item
+                        position={{ row: this.row, column: this.column }}
+                        isInTabSequence={this.isFirstSquare()}
+                    >
+                        <div aria-hidden="true">
+                            {this.piece}
+                        </div>
+                    </focusable-item>
+                </keyboard-navigable>
             </Host >
         );
     }

@@ -17,7 +17,7 @@ export class AppRoot {
         </header>
 
         <main>
-          <chessBoard side={BoardSide.white} />
+          <chess-board side={BoardSide.white} />
         </main>
       </div>
     );

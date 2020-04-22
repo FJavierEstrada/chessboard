@@ -28,11 +28,8 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     }
 
     componentWillLoad() {
-        console.log("Init will load.");
         this.setNavigationAndRenderStrategies(this.side);
-        console.log("Setted navigation and rendering strategy");
         this.boardModel = this.generateDefaultPosition();
-        console.log("Generated default position.");
     }
 
     componentWillRender() {
@@ -41,22 +38,22 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
 
     getLeftItem(): HTMLElement {
         const leftCoordinates = this.navigabilityStrategy.getLeftCoordinates(this.focusedSquare);
-        return this.boardView[leftCoordinates.row][leftCoordinates.column];
+        return this.boardView[leftCoordinates.row][leftCoordinates.column].querySelector("focusable-item") as HTMLElement;
     }
 
     getRightItem(): HTMLElement {
         const RightCoordinates = this.navigabilityStrategy.getRightCoordinates(this.focusedSquare);
-        return this.boardView[RightCoordinates.row][RightCoordinates.column];
+        return this.boardView[RightCoordinates.row][RightCoordinates.column].querySelector("focusable-item") as HTMLElement;
     }
 
     getUpItem(): HTMLElement {
         const upCoordinates = this.navigabilityStrategy.getUpCoordinates(this.focusedSquare);
-        return this.boardView[upCoordinates.row][upCoordinates.column];
+        return this.boardView[upCoordinates.row][upCoordinates.column].querySelector("focusable-item") as HTMLElement;
     }
 
     getDownItem(): HTMLElement {
         const downCoordinates = this.navigabilityStrategy.getDownCoordinates(this.focusedSquare);
-        return this.boardView[downCoordinates.row][downCoordinates.column];
+        return this.boardView[downCoordinates.row][downCoordinates.column].querySelector("focusable-item") as HTMLElement;
     }
 
     notifyFocusedItem(position: ItemPosition) {
@@ -67,19 +64,35 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
 
     render() {
         return (
-            <Host role="grid">
-                <focusedItemListener handler={this}>
-                    <keyboardNavigationListener handler={this}>
+            <Host role="application">
+                <focused-item-listener handler={this}>
+                    <keyboard-navigation-listener handler={this}>
                         <div class="board">
-                            {this.boardView.map((row: HTMLElement[]) => {
-                                row.map((square: HTMLElement) => square);
+                            <div class="top-header">
+                                {this.boardRenderer.renderCharacters()}
+                            </div>
+
+                            {this.boardView.map((row: HTMLElement[], index: number) => {
+                                return (
+                                    <div class="row">
+                                        <div class="number">
+                                            {index}
+                                        </div>
+                                        {row}
+                                        <div class="number">
+                                            {index}
+                                        </div>
+                                    </div>
+                                )
                             })
                             }
+
+                            <div class="bottom-header">
+                                {this.boardRenderer.renderCharacters()}
+                            </div>
                         </div>
-                        {this.boardRenderer.renderRowHeader()}
-                        {this.boardRenderer.renderColumnHeader()}
-                    </keyboardNavigationListener>
-                </focusedItemListener>
+                    </keyboard-navigation-listener>
+                </focused-item-listener>
             </Host>
         );
     }

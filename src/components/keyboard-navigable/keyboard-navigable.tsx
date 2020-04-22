@@ -18,18 +18,22 @@ export class KeyboardNavigable {
     protected keyupHandler(event: KeyboardEvent) {
         switch (event.key) {
             case KeyCodes.UP:
+                event.preventDefault();
                 event.stopPropagation();
                 this.upArrow.emit();
                 break;
             case KeyCodes.DOWN:
+                event.preventDefault();
                 event.stopPropagation();
                 this.downArrow.emit();
                 break;
             case KeyCodes.LEFT:
+                event.preventDefault();
                 event.stopPropagation();
                 this.leftArrow.emit();
                 break;
             case KeyCodes.RIGHT:
+                event.preventDefault();
                 event.stopPropagation();
                 this.rightArrow.emit();
         }

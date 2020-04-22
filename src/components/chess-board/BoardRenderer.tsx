@@ -3,8 +3,8 @@ import { BoardModel, BoardView, ChessPiece, BoardSide, arrayToBoardColumn, array
 
 export interface BoardRenderer {
     renderBoard(model: BoardModel): BoardView;
-    renderRowHeader(): HTMLElement;
-    renderColumnHeader(): HTMLElement;
+    renderNumber(row: number): HTMLElement;
+    renderCharacters(): HTMLElement[];
 }
 
 export class WhiteSideRenderer implements BoardRenderer {
@@ -15,7 +15,7 @@ export class WhiteSideRenderer implements BoardRenderer {
             const rowView: HTMLElement[] = [];
             row.forEach((square: ChessPiece, j: number) => {
                 rowView.push(
-                    <chessSquare
+                    <chess-square
                         row={i}
                         column={j}
                         piece={square}
@@ -28,34 +28,21 @@ export class WhiteSideRenderer implements BoardRenderer {
         return view;
     }
 
-    renderColumnHeader(): HTMLElement {
+    renderCharacters(): HTMLElement[] {
         const cols = Array.from(Array(8).keys());
-        return (
-            <div class="col-headers">
-                {cols.map((i: number) => {
-                    return (
-                        <div class="col-header">
-                            {arrayToBoardColumn(i)}
-                        </div>
-                    );
-                })
-                }
-            </div>
-        );
+        return cols.map((i: number) => {
+            return (
+                <div class="col-header">
+                    {arrayToBoardColumn(i)}
+                </div>
+            );
+        })
     }
 
-    renderRowHeader(): HTMLElement {
-        const rows = Array.from(Array(8).keys());
+    renderNumber(row: number): HTMLElement {
         return (
-            <div class="row-headers">
-                {rows.map((i: number) => {
-                    return (
-                        <div class="row-header">
-                            {arrayToBoardRow(i)}
-                        </div>
-                    );
-                })
-                }
+            <div class="row-header">
+                {arrayToBoardRow(row)}
             </div>
         );
     }
@@ -70,7 +57,7 @@ export class BlackSideRenderer implements BoardRenderer {
             const rowView: HTMLElement[] = [];
             row.reverse().forEach((square: ChessPiece, j: number) => {
                 rowView.push(
-                    <chessSquare
+                    <chess-square
                         row={7 - i}
                         column={7 - j}
                         piece={square}
@@ -83,34 +70,21 @@ export class BlackSideRenderer implements BoardRenderer {
         return view;
     }
 
-    renderColumnHeader(): HTMLElement {
+    renderCharacters(): HTMLElement[] {
         const cols = Array.from(Array(8).keys());
-        return (
-            <div>
-                {cols.forEach((i: number) => {
-                    return (
-                        <div class="col-header">
-                            {arrayToBoardColumn(i)}
-                        </div>
-                    );
-                })
-                }
-            </div>
-        );
+        return cols.map((i: number) => {
+            return (
+                <div class="col-header">
+                    {arrayToBoardColumn(i)}
+                </div>
+            );
+        })
     }
 
-    renderRowHeader(): HTMLElement {
-        const rows = Array.from(Array(8).keys());
+    renderNumber(row: number): HTMLElement {
         return (
-            <div>
-                {rows.forEach((i: number) => {
-                    return (
-                        <div class="row-header">
-                            {arrayToBoardRow(i)}
-                        </div>
-                    );
-                })
-                }
+            <div class="row-header">
+                {9 - (arrayToBoardRow(row) as number)}
             </div>
         );
     }
