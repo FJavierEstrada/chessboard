@@ -90,7 +90,7 @@ declare namespace LocalJSX {
     interface AppRoot {
     }
     interface ChessBoard {
-        "side"?: BoardSide;
+        "side": BoardSide;
     }
     interface ChessSquare {
         "column": number;

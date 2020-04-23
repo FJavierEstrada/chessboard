@@ -40,7 +40,7 @@ export class KeyboardNavigationListener {
     }
 
     focus(item: HTMLElement | undefined) {
-        if (item !== undefined) item.focus();
+        if (item) item.focus();
     }
 
     render() {

@@ -12,18 +12,20 @@ import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationH
 })
 export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler {
 
-    @Prop() side: BoardSide = BoardSide.white;
+    @Prop() side!: BoardSide;
 
     @State() boardModel: BoardModel;
+    @State() navigabilityStrategy: DirectionalNavigabilityStrategy;
+    @State() boardRenderer: BoardRenderer;
+
 
     @Element() element: HTMLElement;
 
     private focusedSquare: ItemPosition2D;
-    private navigabilityStrategy: DirectionalNavigabilityStrategy;
-    private boardRenderer: BoardRenderer;
 
     @Watch('side')
-    sideChanged(newSide: BoardSide) {
+    sideChanged(newSide: BoardSide, oldSide: BoardSide) {
+        console.debug("Watching side");
         this.setNavigationAndRenderStrategies(newSide);
     }
 
@@ -117,7 +119,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
         return board;
     }
 
-    setNavigationAndRenderStrategies(side: BoardSide) {
+    private setNavigationAndRenderStrategies(side: BoardSide) {
         if (side === BoardSide.white) {
             this.navigabilityStrategy = new WhiteSideNavigabilityStrategy();
             this.boardRenderer = new WhiteSideRenderer();

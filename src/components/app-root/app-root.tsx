@@ -1,4 +1,4 @@
-import { Component, h } from '@stencil/core';
+import { Component, h, State } from '@stencil/core';
 import { BoardSide } from '../../utils/chess-utils';
 
 
@@ -9,6 +9,14 @@ import { BoardSide } from '../../utils/chess-utils';
 })
 export class AppRoot {
 
+  @State() side: BoardSide = BoardSide.white;
+
+  toggleSide() {
+    console.debug("Toggling board side.");
+    if (this.side === BoardSide.white) this.side = BoardSide.black;
+    else this.side = BoardSide.white;
+  }
+
   render() {
     return (
       <div>
@@ -17,7 +25,8 @@ export class AppRoot {
         </header>
 
         <main>
-          <chess-board side={BoardSide.white} />
+          <chess-board side={BoardSide.black} />
+          <button onClick={this.toggleSide}>Toggle side</button>
         </main>
       </div>
     );
