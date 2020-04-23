@@ -1,6 +1,6 @@
 ## 1 - Introducción
 
-Stencil JS es un framework que nos permite crear web components reusables con cualquier tecnología web fácilmente debido a que se basa en el estándar de HTML. Sin embargo, una de las dificultades que podemos encontrarnos es la duplicidad de código. Los web components no soportan mecanismos de herencia. ¿Tenemos que reescribir (o copiar) nuestro código entonces cuando encontremos componentes que compartan muchas características pero sean ligeramente diferentes?
+Stencil JS es un framework que nos permite crear web components reusables con cualquier tecnología web fácilmente debido a que se basa en el estándar de HTML. Sin embargo, una de las dificultades que podemos encontrarnos es la duplicidad de código. Los web components no soportan mecanismos de herencia. ¿Tenemos que reescribir (o copiar) nuestro código cuando encontremos componentes que compartan muchas características pero sean ligeramente diferentes?
 
 En este tutorial vamos a aprender a usar la composición de componentes para reutilizar nuestro código al máximo y eliminar las duplicidades. Para ello, veremos un ejemplo con un tablero de ajedrez al que tendremos que añadir capacidades de navegación por teclado. Esta funcionalidad podría ser reutilizada más adelante en otros componentes como menús. 
 
@@ -32,6 +32,12 @@ Simple, ¿no? Quizá no tanto… Vamos a verlo con más detalle en un ejemplo. C
 
 ¡Manos a la obra! Lo primero es crear un proyecto nuevo de Stencil. Con el entorno que tenemos configurado, esto es tan simple como abrir la paleta de comandos y buscar por *Stencil*. Encontraremos el omando *start a new project*. En nuestro caso, vamos a crear directamente una aplicación web. Seguimos el pequeño asistente y, ¡ya lo tenemos listo!
 
+Antes de seguir, podemos detenernos a limpiar el proyecto. Como veréis, la extensión ha generado unas cuantas cosas por defecto. Nos valdrá quedarnos con el componente *app-root*. También podemos eliminar el paquete de Stencil Router, ya que no vamos a utilizarlo. También podemos agregar Jest a nuestras dependencias para los test. 
+
+``` 
+npm install --save @types/jest
+```
+
 ### 4. 1 - Encapsular el código para reutilizar
 
 Reutilizar código es siempre una buena idea. No sólo escribimos menos, sino que es más fácil realizar test y se obtiene un producto más mantenible. Tradicionalmente, se ha utilizado la herencia de clases para reutilizar código. Sin embargo, no siempre es la mejor solución. Diferentes patrones de diseño pueden aplicarse a ciertos problemas para solventar las limitaciones que tiene el enfoque de la herencia. 
@@ -40,7 +46,7 @@ En nuestro caso, directamente no podemos realizar herencia entre web components.
 
 Aquí entra en juego la composición de componentes, valga la redundancia. Igual que agrupamos los elementos HTML básicos unos dentro de otros, también podemos hacer lo mismo con los web components. La única diferencia es que nosotros vamos a aprovechar esta capacidad no sólo para crear una jerarquía y una lógica de presentación, sino que también vamos a crear "componentes de comportamiento". Estos se limitarán a encapsular una cierta funcionalidad, de modo que, al componerlos dentro de otros, otorguen sus capacidades sin necesidad de duplicar el código constantemente. 
 
-Vamos a utilizar un patrón de arquitectura emiter-listener-handler. Commo veréis a continuación, es una solución que se adapta muy bien al problema. El primer componente se encarga de capturar los eventos básicos que queremos controlar y envolverlos para facilitar su escucha. El listener se encargará de escuchar los eventos del emiter. Sin embargo, no dispone de ninguna información acerca del componente concreto que estemos desarrollando. Por eso debe apoyarse en el handler, que será una implementación concreta y limitada para cada caso. De este modo, dos de los tres componentes pueden reutilizarse para cualquier otro problema similar, mientras que sólo debemos implementar una tercera parte del código y componerlo con el resto. Fantástico, ¿verdad? Vamos a ver cómo hacerlo con dos ejemplos. 
+Vamos a utilizar un patrón de arquitectura emitter-listener-handler. Commo veréis a continuación, es una solución que se adapta muy bien al problema. El primer componente se encarga de capturar los eventos básicos que queremos controlar y envolverlos para facilitar su escucha. El listener se encargará de escuchar los eventos del emiter. Sin embargo, no dispone de ninguna información acerca del componente concreto que estemos desarrollando. Por eso debe apoyarse en el handler, que será una implementación concreta y limitada para cada caso. De este modo, dos de los tres componentes pueden reutilizarse para cualquier otro problema similar, mientras que sólo debemos implementar una tercera parte del código y componerlo con el resto. Fantástico, ¿verdad? Vamos a ver cómo hacerlo con dos ejemplos. 
 
 #### 4. 1. 1 - Navegación por teclado
 
@@ -127,8 +133,96 @@ export class KeyboardNavigable {
 Algunas notas sobre este componente:
 
 * Como solo nos interesa la tecla que se ha pulsado, el evento puede llevar cualquier tipo de valor. 
+* Es importante detener la propagación de los *KeyboardEvent* para que no sean escuchados por emitters que estén por encima. Sin embargo, hay que haceerlo para los casos concretos de las flechas, ya que podría interesarnos que el evento sí se propagase en caso de ser un carácter. 
 * Usamos *keyup* y no *keydown* por motivos de accesibilidad. Este evento solo se llama una vez al soltar la tecla, mientras que *keydown* puede llamarse múltiples veces durante una pulsación prolongada. 
 * Utilizamos el atributo *role=none* en el elemento *Host* para que el componente sea ignorado por la capa de accesibilidad. Solo encapsula comportamiento, no queremos que se represente de ninguna forma al usuario. Esto no impide que lo que haya dentro mediante el *slot* se presente al usuario. Utilizar el atributo *aria-hidden* para ese propósito. 
+
+Además, algo de CSS para hacerlo transparente en cuanto a representación:
+
+``` 
+keyboard-navigable {
+    width: 100%;
+    height: 100%;
+}
+```
+
+Podemos testear este componente gracias a la librería que ofrece Stencil. Para ello, vamos a escribir nuestros test en *keyboard-navigable. e2e. ts*:
+
+``` 
+import { newE2EPage } from '@stencil/core/testing';
+import { KeyCodes } from '../../utils/keyboard-utils';
+
+describe('keyboard-navigable', () => {
+  it('should renders', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<keyboard-navigable></keyboard-navigable>');
+    const element = await page.find('keyboard-navigable');
+    expect(element).toHaveClass('hydrated');
+  });
+
+  it("should notify up arrow pressed", async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<keyboard-navigable></keyboard-navigable>');
+    const element = await page.find('keyboard-navigable');
+    const spyEvent = await element.spyOnEvent("upArrow");
+    // The element must be focusable in order to press a key inside.
+    element.tabIndex = -1;
+    await page.waitForChanges();
+    await element.press(KeyCodes.UP);
+
+    expect(spyEvent).toHaveReceivedEventTimes(1);
+  });
+
+  it("should notify down arrow pressed", async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<keyboard-navigable></keyboard-navigable>');
+    const element = await page.find('keyboard-navigable');
+    const spyEvent = await element.spyOnEvent("downArrow");
+    // The element must be focusable in order to press a key inside.
+    element.tabIndex = -1;
+    await page.waitForChanges();
+    await element.press(KeyCodes.DOWN);
+
+    expect(spyEvent).toHaveReceivedEventTimes(1);
+  });
+
+  it("should notify left arrow pressed", async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<keyboard-navigable></keyboard-navigable>');
+    const element = await page.find('keyboard-navigable');
+    const spyEvent = await element.spyOnEvent("leftArrow");
+    // The element must be focusable in order to press a key inside.
+    element.tabIndex = -1;
+    await page.waitForChanges();
+    await element.press(KeyCodes.LEFT);
+
+    expect(spyEvent).toHaveReceivedEventTimes(1);
+  });
+
+  it("should notify right arrow pressed", async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<keyboard-navigable></keyboard-navigable>');
+    const element = await page.find('keyboard-navigable');
+    const spyEvent = await element.spyOnEvent("rightArrow");
+    // The element must be focusable in order to press a key inside.
+    element.tabIndex = -1;
+    await page.waitForChanges();
+    await element.press(KeyCodes.RIGHT);
+
+    expect(spyEvent).toHaveReceivedEventTimes(1);
+  });
+
+});
+```
+
+Como podéis ver, no son test unitarios, sino end-to-end. Este tipo de test se adapta mejor a nuestras necesidades. Nos permite trabajar con los componentes como si estuvieran rennderizados en un navegador. Así, podemos ver que, efectivamente, responden a las interacciones, y no sólo simularlas mediante llamadas a métodos. 
+
+Es importante notar que si el elemento no puede recibir el foco, no podemos presionar una tecla dentro de él. Por eso, en este test le hemos dado un tabindex. Sin embargo, en la práctica, lo que vamos a hacer es crear un componente que pueda recibir y manejar el foco. Es decir, le dotaremos de enfocabilidad mediante composición. 
 
 ##### 4. 1. 1. 3 - La interfaz KeyboardNavigationHandler
 
@@ -165,31 +259,35 @@ export class KeyboardNavigationListener {
     @Prop() handler: KeyboardNavigationHandler;
 
     @Listen('upArrow')
-    protected upArrowHandler() {
+    protected upArrowHandler(event: CustomEvent<any>) {
+        event?.stopPropagation();
         const itemToFocus = this.handler.getUpItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
     @Listen('downArrow')
-    protected downArrowHandler() {
+    protected downArrowHandler(event: CustomEvent<any>) {
+        event?.stopPropagation();
         const itemToFocus = this.handler.getDownItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
     @Listen('leftArrow')
-    protected leftArrowHandler() {
+    protected leftArrowHandler(event: CustomEvent<any>) {
+        event?.stopPropagation();
         const itemToFocus = this.handler.getLeftItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
     @Listen('rightArrow')
-    protected rightArrowHandler() {
+    protected rightArrowHandler(event: CustomEvent<any>) {
+        event?.stopPropagation();
         const itemToFocus = this.handler.getRightItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
-    focus(item: HTMLElement | undefined) {
-        if (item !== undefined) item.focus();
+    focusItem(item: HTMLElement | undefined) {
+        if (item instanceof HTMLElement) item.focus();
     }
 
     render() {
@@ -205,8 +303,98 @@ export class KeyboardNavigationListener {
 Algunas notas sobre el componente:
 
 * Contiene la propiedad **handler** que debe ser asignada por su padre. De esta forma, podemos recuperar el elemento al que hay que desplazar el foco sin importar el contexto concreto. De eso se encarga cada widget específico. 
+* Detenemos también la propagación de nuestros eventos personalizados. Si no, podría provocar problemas en un contexto en que tuviéramos varios *KeyboardNavigationListener* apilados, como en un menú con diversos submenús. 
 * Sólo hacemos foco si el valor devuelto por el padre no es *undefined*. En caso contrario, no hay acción. 
 * Como **KeyboardNavigable**, el *role* del elemento *Host* es none y no tiene shadow DOM. 
+
+Como en el caso anterior, también podemos realizar test end-to-end para asegurarnos de que funciona. 
+
+``` 
+import { newE2EPage } from '@stencil/core/testing';
+import { KeyCodes } from '../../utils/keyboard-utils';
+
+describe('keyboard-navigation-listener', () => {
+
+  it('should ask for the up item', async () => {
+    const mockGetItem = jest.fn().mockReturnValue(undefined);
+    const page = await newE2EPage();
+    await page.setContent('<keyboard-navigation-listener><keyboard-navigable></keyboard-navigable></keyboard-navigation-listener>');
+    await page.exposeFunction("getItem", mockGetItem);
+
+    const navigable = await page.find("keyboard-navigable");
+
+    navigable.tabIndex = -1;
+    await page.$eval("keyboard-navigation-listener", (element: any) => {
+      element.handler = { getUpItem: this.getItem };
+    });
+    await page.waitForChanges();
+
+    await navigable.press(KeyCodes.UP);
+
+    expect(mockGetItem).toHaveBeenCalled();
+  });
+
+  it('should ask for the down item', async () => {
+    const mockGetItem = jest.fn().mockReturnValue(undefined);
+    const page = await newE2EPage();
+    await page.setContent('<keyboard-navigation-listener><keyboard-navigable></keyboard-navigable></keyboard-navigation-listener>');
+    await page.exposeFunction("getItem", mockGetItem);
+
+    const navigable = await page.find("keyboard-navigable");
+
+    navigable.tabIndex = -1;
+    await page.$eval("keyboard-navigation-listener", (element: any) => {
+      element.handler = { getDownItem: this.getItem };
+    });
+    await page.waitForChanges();
+
+    await navigable.press(KeyCodes.DOWN);
+
+    expect(mockGetItem).toHaveBeenCalled();
+  });
+
+  it('should ask for the left item', async () => {
+    const mockGetItem = jest.fn().mockReturnValue(undefined);
+    const page = await newE2EPage();
+    await page.setContent('<keyboard-navigation-listener><keyboard-navigable></keyboard-navigable></keyboard-navigation-listener>');
+    await page.exposeFunction("getItem", mockGetItem);
+
+    const navigable = await page.find("keyboard-navigable");
+
+    navigable.tabIndex = -1;
+    await page.$eval("keyboard-navigation-listener", (element: any) => {
+      element.handler = { getLeftItem: this.getItem };
+    });
+    await page.waitForChanges();
+
+    await navigable.press(KeyCodes.LEFT);
+
+    expect(mockGetItem).toHaveBeenCalled();
+  });
+
+  it('should ask for the right item', async () => {
+    const mockGetItem = jest.fn().mockReturnValue(undefined);
+    const page = await newE2EPage();
+    await page.setContent('<keyboard-navigation-listener><keyboard-navigable></keyboard-navigable></keyboard-navigation-listener>');
+    await page.exposeFunction("getItem", mockGetItem);
+
+    const navigable = await page.find("keyboard-navigable");
+
+    navigable.tabIndex = -1;
+    await page.$eval("keyboard-navigation-listener", (element: any) => {
+      element.handler = { getRightItem: this.getItem };
+    });
+    await page.waitForChanges();
+
+    await navigable.press(KeyCodes.RIGHT);
+
+    expect(mockGetItem).toHaveBeenCalled();
+  });
+
+});
+```
+
+La forma de mockear el *handler* es un poco enrevesada, pero la API de Stencil limpia el objeto de funciones si lo asignamos con el método **setProperty**. 
 
 #### 4. 1. 2 - Manejo del foco
 
@@ -252,6 +440,61 @@ Algunas notas sobre este componente:
 
 * La Propiedad isInTabSequence se utiliza para determinar si el componente se debe incluir en la secuencia del tabulador. Como Normalmente no nos interesa, la ponemos por defecto a false. Sin embargo, puede ser útil incluirla en el primer componente hijo para que podamos empezar a desplazar el foco con las flechas a partir de él. 
 * En este caso, el evento que emitimos lleva asociada la posición del item. Este dato puede ser interesante para el conocimiento del padre. A continuación veremos cómo usarla. 
+
+También debemos darle algo de CSS. La propiedad **outline** permitirá que se visualice el foco:
+
+``` 
+focusable-item {
+    width: 100%;
+    height: 100%;
+    outline: thick;
+}
+```
+
+Testearlo es también sencillo:
+
+``` 
+import { newE2EPage } from '@stencil/core/testing';
+import { ItemPosition } from '../../abstraction/FocusedItemHandler';
+
+describe('focusable-item', () => {
+  it('should render out of tab sequence', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<focusable-item></focusable-item>');
+    const element = await page.find('focusable-item');
+    expect(element).toHaveClass('hydrated');
+    expect(element.tabIndex).toBe(-1);
+  });
+
+  it('should render into the tab sequence', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<focusable-item></focusable-item>');
+    const element = await page.find('focusable-item');
+
+    element.setProperty("isInTabSequence", true);
+    await page.waitForChanges();
+    expect(element).toHaveClass('hydrated');
+    expect(element.tabIndex).toBe(0);
+  });
+
+  it("should notify focused", async () => {
+    const page = await newE2EPage();
+    const position: ItemPosition = { row: 3, column: 1 };
+    await page.setContent('<focusable-item></focusable-item>');
+    const element = await page.find('focusable-item');
+
+    element.setProperty("position", position);
+    await page.waitForChanges();
+
+    const spyEvent = await element.spyOnEvent("focusedItem");
+    await element.focus();
+    expect(spyEvent).toHaveReceivedEventDetail(position);
+  });
+
+});
+```
 
 ##### 4. 1. 2. 2 - FocusedItemHandler
 
@@ -313,6 +556,7 @@ export class FocusedItemListener {
 
     @Listen('focusedItem')
     protected focusedItemHandler(event: CustomEvent<ItemPosition>) {
+        event.stopPropagation();
         this.handler.notifyFocusedItem(event.detail);
     }
 
@@ -324,6 +568,30 @@ export class FocusedItemListener {
         );
     }
 }
+```
+
+Probarlo es igual de sencillo:
+
+``` 
+it('should notify to handler when listens a focusedItem event', async () => {
+    const mockNotify = jest.fn();
+    const position: ItemPosition = { row: 3, column: 1 };
+    const page = await newE2EPage();
+    await page.setContent('<focused-item-listener><focusable-item></focusable-item></focused-item-listener>');
+    await page.exposeFunction("notifyFocusedItem", mockNotify);
+
+    const focusable = await page.find("focusable-item");
+
+    await focusable.setProperty("position", position);
+    await page.$eval("focused-item-listener", (element: any) => {
+      element.handler = { notifyFocusedItem: this.notifyFocusedItem }
+    });
+    await page.waitForChanges();
+
+    await focusable.focus();
+
+    expect(mockNotify).toHaveBeenCalledWith(position);
+  });
 ```
 
 ### 4. 2 - Aplicar la solución a nuestro problema
@@ -361,6 +629,8 @@ export enum ChessPieceDescription {
 export enum BoardSide { white, black }
 ```
 
+Aunque podríamos utilizar imágenes, vamos a mantener la simplicidad. Utilizaremos la notación fen para las piezas, que utiliza mayúsculas para las blancas y minúsculas para las negras. Así no tendremos tampoco problemas de contraste. 
+
 También tenemos que crear algunas utilidades que nos permitan traducir de un sistema al otro. Esto también influye a la hora de interpretar a qué casilla se debe mover cuando pulsamos una tecla. Para este caso, implementamos un patrón estrategia:
 
 ``` 
@@ -389,6 +659,7 @@ export interface DirectionalNavigabilityStrategy {
     getRightCoordinates(current: ItemPosition2D): ItemPosition2D;
     getUpCoordinates(current: ItemPosition2D): ItemPosition2D;
     getDownCoordinates(current: ItemPosition2D): ItemPosition2D;
+    translateCoordinatesToOneDimension(position: ItemPosition2D): number;
 }
 
 export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStrategy {
@@ -411,6 +682,10 @@ export class WhiteSideNavigabilityStrategy implements DirectionalNavigabilityStr
     getDownCoordinates(current: ItemPosition2D): ItemPosition2D {
         if (current.row === 7) return current;
         return { row: current.row + 1, column: current.column };
+    }
+
+    translateCoordinatesToOneDimension(position: ItemPosition2D): number {
+        return position.row * 8 + position.column;
     }
 
 }
@@ -437,14 +712,20 @@ export class BlackSideNavigabilityStrategy implements DirectionalNavigabilityStr
         return { row: current.row - 1, column: current.column };
     }
 
+    translateCoordinatesToOneDimension(position: ItemPosition2D): number {
+        return 63 - (position.row * 8 + position.column);
+    }
+
 }
 ```
 
 Como se puede apreciar, ya que nuestro tablero es un componente bidimensional, utilizamos **ItemPosition2D** en lugar del tipo genérico **ItemPosition**. 
 
+También hemos creado un traductor de coordenadas bidimensionales a unidimensionales. El motivo es que cuando consultemos el DOM en busca de nuestras casillas, nos devolverá una colección lineal. 
+
 #### 4. 2. 2 - El componente ChessSquare
 
-Como hemos dicho, este componente representa cada casilla del tablero. Para cada una, tendremos que saber su posición, si tiene una pieza y cuál es en caso afirmativo, y el color de la casilla. Algunos de estos datos pueden ser calculados a partir de otros. Además, incluiremos los dos emiter de nuestra arquitectura para incorporar su comportamiento:
+Como hemos dicho, este componente representa cada casilla del tablero. Para cada una, tendremos que saber su posición, si tiene una pieza y cuál es en caso afirmativo, y el color de la casilla. Algunos de estos datos pueden ser calculados a partir de otros. Además, incluiremos los dos emitter de nuestra arquitectura para incorporar su comportamiento:
 
 ``` 
 import { Component, h, Prop, Host } from '@stencil/core';
@@ -470,7 +751,7 @@ export class ChessSquare {
     }
 
     private getAccessibleDescription = (): string => {
-        return `${arrayToBoardRow(this.row)}${arrayToBoardColumn(this.column)} - ${this.piece ? ChessPieceDescription[this.piece] : ""}` ;
+        return `${arrayToBoardColumn(this.column)}${arrayToBoardRow(this.row)} - ${this.piece ? ChessPieceDescription[this.piece] : ""}` ;
     }
 
     private isFirstSquare = (): boolean => {
@@ -486,17 +767,19 @@ export class ChessSquare {
                     "white-square": this.getColour() === SquareColour.white,
                     "black-square": this.getColour() === SquareColour.black,
                 }}
-                role="gridcell"
+                role="button"
                 aria-label={this.getAccessibleDescription()}
             >
-                <focusableItem
-                    position={{ row: this.row, column: this.column }}
-                    isInTabSequence={this.isFirstSquare()}
-                >
-                    <keyboardNavigable>
-                        {this.piece}
-                    </keyboardNavigable>
-                </focusableItem>
+                <keyboard-navigable>
+                    <focusable-item
+                        position={{ row: this.row, column: this.column }}
+                        isInTabSequence={this.isFirstSquare()}
+                    >
+                        <div class="hidder" aria-hidden="true">
+                            {this.piece}
+                        </div>
+                    </focusable-item>
+                </keyboard-navigable>
             </Host >
         );
     }
@@ -504,6 +787,44 @@ export class ChessSquare {
 ```
 
 Como vemos, la complejidad referente a la navegación y el manejo del foco ha sido incorporada con un par de etiquetas. Lo único que hace el componente es preocuparse por la representación gráfica y algunos cálculos necesarios para este caso concreto. 
+
+* Se utiliza un *div* con la propiedad aria-hidden para ocultar la letra de la pieza a las tecnologías de asistencia, como los lectores de pantalla. 
+* La información accesible de cada casilla se proporciona a través de la propiedad *aria-label*, incluida la descripción expandida de la pieza si la hay. 
+* Se le asigna el *role* button para que el usuario sepa que puede activarse, aunque no vayamos a implementarlo en este tutorial. 
+
+Y aquí el CSS. Como veis, usamos **box-sizing** para que el foco no exceda el tamaño de la caja. También usamos todo el espacio disponible y centramos las piezas:
+
+``` 
+chess-square {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+
+    font-size: 2rem;
+    text-align: center;
+    vertical-align: middle;
+    border: 0px;
+}
+
+chess-square:focus-within {
+    border: 2px solid red;
+}
+
+.white-square {
+    background-color: white;
+    color: black;
+}
+
+.black-square {
+    background-color: black;
+    color: white;
+}
+
+.hidder {
+    height: 100%;
+    width: 100%;
+}
+```
 
 #### 4. 2. 3 - Board renderers
 
@@ -606,6 +927,8 @@ export class BlackSideRenderer implements BoardRenderer {
 }
 ```
 
+Para los números sólo devolvemos un elemento, ya que vamos a incorporarlos en cada fila por separado. 
+
 #### 4. 2. 4 - El componente ChessBoard
 
 Y llegamos al final del camino. Este componente será el padre de todos. Implementará las dos interfaces handler para completar el patrón que hemos construido. Como veréis, esto permite delimitar muy bien lo que tenemos que hacer y reutiliza todo el código posible:
@@ -635,7 +958,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     private focusedSquare: ItemPosition2D;
 
     @Watch('side')
-    sideChanged(newSide: BoardSide, oldSide: BoardSide) {
+    sideChanged(newSide: BoardSide) {
         console.debug("Watching side");
         this.setNavigationAndRenderStrategies(newSide);
     }
@@ -681,32 +1004,26 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
                 <focused-item-listener handler={this}>
                     <keyboard-navigation-listener handler={this}>
                         <div class="board">
-                            <div class="top-header">
-                                {this.boardRenderer.renderCharacters()}
-                            </div>
+                            <div class="corner"></div>
+                            {this.boardRenderer.renderCharacters()}
+                            <div class="corner"></div>
 
                             {this.boardRenderer.renderBoard(this.boardModel).map((row: HTMLElement[], index: number) => {
-                                return (
-                                    <div class="row">
-                                        <div class="number">
-                                            {this.boardRenderer.renderNumber(index)}
-                                        </div>
-                                        {row}
-                                        <div class="number">
-                                            {this.boardRenderer.renderNumber(index)}
-                                        </div>
-                                    </div>
-                                )
+                                return [
+                                    this.boardRenderer.renderNumber(index),
+                                    ...row,
+                                    this.boardRenderer.renderNumber(index)
+                                ]
                             })
                             }
 
-                            <div class="bottom-header">
-                                {this.boardRenderer.renderCharacters()}
-                            </div>
+                            <div class="corner"></div>
+                            {this.boardRenderer.renderCharacters()}
+                            <div class="corner"></div>
                         </div>
                     </keyboard-navigation-listener>
                 </focused-item-listener>
-            </Host>
+            </Host >
         );
     }
 
@@ -754,7 +1071,75 @@ Veamos algunas cosas importantes:
 * La implementación de **KeyboardNavigationHandler** devuelve al listener el elemento **FocusableItem** dentro de cada casilla. Esto es así porque sólo este puede ser enfocado. 
 * La implementación de **FocusedItemHandler** actualiza la casilla seleccionada actualmente. Importante para que pueda devolverse la casilla correcta ante la navegación por flecha. 
 
-Sólo falta probarlo. Para ello, vamos al componente **app-root** que se creó por defecto al construir el proyecto inicial. Dentro del elemento <main>, borramos todo e incluimos nuestro elemento <chess-board>. Ejecutamos npm start y, ¡disfrutamos del resultado!
+Y aquí el CSS. Por supuesto, la mejor forma de representar el tablero es usando *grid*:
+
+``` 
+.board {
+    display: grid;
+    grid-template-columns: 3em repeat(8, 1fr) 3em;
+    grid-template-rows: 3em repeat(8, 1fr) 3em;
+    align-items: center;
+
+    height: 46rem;
+    width: 46rem;
+    margin: 2em auto;
+    padding: 2em;
+    background-color: #DEB887;
+}
+
+.col-header {
+    text-align: center;
+}
+
+.row-header {
+    text-align: center;
+}
+```
+
+Sólo falta probarlo. Para ello, vamos al componente *app-root* que se creó por defecto al construir el proyecto inicial. Agregamos aquí nuestro componente *ChessBoard*. Además, vamos a incluir un botón para poder dar la vuelta al tablero de forma dinámica. El resultado quedaría así:
+
+``` 
+import { Component, h, State } from '@stencil/core';
+import { BoardSide } from '../../utils/chess-utils';
+
+@Component({
+  tag: 'app-root',
+  styleUrl: 'app-root.css',
+  shadow: true
+})
+export class AppRoot {
+
+  @State() side: BoardSide = BoardSide.white;
+
+  toggleSide = () => {
+    console.debug("Toggling board side.");
+    console.debug(this.side);
+    if (this.side === BoardSide.white) this.side = BoardSide.black;
+    else this.side = BoardSide.white;
+  }
+
+  render() {
+    return (
+      <div>
+        <header>
+          <h1>Chessboard</h1>
+        </header>
+
+        <main>
+          <chess-board side={this.side} />
+          <button onClick={this.toggleSide}>Toggle side</button>
+        </main>
+      </div>
+    );
+  }
+}
+```
+
+¡Listo! ¡Sólo queda probarlo!
+
+``` 
+npm start
+```
 
 ## 5 - Conclusiones
 
