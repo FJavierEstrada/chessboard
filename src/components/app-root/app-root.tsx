@@ -11,8 +11,9 @@ export class AppRoot {
 
   @State() side: BoardSide = BoardSide.white;
 
-  toggleSide() {
+  toggleSide = () => {
     console.debug("Toggling board side.");
+    console.debug(this.side);
     if (this.side === BoardSide.white) this.side = BoardSide.black;
     else this.side = BoardSide.white;
   }
@@ -25,7 +26,7 @@ export class AppRoot {
         </header>
 
         <main>
-          <chess-board side={BoardSide.black} />
+          <chess-board side={this.side} />
           <button onClick={this.toggleSide}>Toggle side</button>
         </main>
       </div>
