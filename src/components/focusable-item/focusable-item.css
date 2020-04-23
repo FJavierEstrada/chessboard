@@ -1,3 +1,5 @@
 focusable-item {
-    /* Component styles go here */
+    width: 100%;
+    height: 100%;
+    outline: thick;
 }

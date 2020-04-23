@@ -24,7 +24,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     private focusedSquare: ItemPosition2D;
 
     @Watch('side')
-    sideChanged(newSide: BoardSide, oldSide: BoardSide) {
+    sideChanged(newSide: BoardSide) {
         console.debug("Watching side");
         this.setNavigationAndRenderStrategies(newSide);
     }
@@ -70,32 +70,26 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
                 <focused-item-listener handler={this}>
                     <keyboard-navigation-listener handler={this}>
                         <div class="board">
-                            <div class="top-header">
-                                {this.boardRenderer.renderCharacters()}
-                            </div>
+                            <div class="corner"></div>
+                            {this.boardRenderer.renderCharacters()}
+                            <div class="corner"></div>
 
                             {this.boardRenderer.renderBoard(this.boardModel).map((row: HTMLElement[], index: number) => {
-                                return (
-                                    <div class="row">
-                                        <div class="number">
-                                            {this.boardRenderer.renderNumber(index)}
-                                        </div>
-                                        {row}
-                                        <div class="number">
-                                            {this.boardRenderer.renderNumber(index)}
-                                        </div>
-                                    </div>
-                                )
+                                return [
+                                    this.boardRenderer.renderNumber(index),
+                                    ...row,
+                                    this.boardRenderer.renderNumber(index)
+                                ]
                             })
                             }
 
-                            <div class="bottom-header">
-                                {this.boardRenderer.renderCharacters()}
-                            </div>
+                            <div class="corner"></div>
+                            {this.boardRenderer.renderCharacters()}
+                            <div class="corner"></div>
                         </div>
                     </keyboard-navigation-listener>
                 </focused-item-listener>
-            </Host>
+            </Host >
         );
     }
 

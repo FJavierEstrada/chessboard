@@ -1,12 +1,16 @@
 chess-square {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+
     font-size: 2rem;
     text-align: center;
     vertical-align: middle;
     border: 0px;
 }
 
-chess-square:focus {
-    border: 1px solid #888888;
+chess-square:focus-within {
+    border: 2px solid red;
 }
 
 .white-square {
@@ -17,4 +21,9 @@ chess-square:focus {
 .black-square {
     background-color: black;
     color: white;
+}
+
+.hidder {
+    height: 100%;
+    width: 100%;
 }

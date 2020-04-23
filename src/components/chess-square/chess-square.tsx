@@ -45,7 +45,7 @@ export class ChessSquare {
                         position={{ row: this.row, column: this.column }}
                         isInTabSequence={this.isFirstSquare()}
                     >
-                        <div aria-hidden="true">
+                        <div class="hidder" aria-hidden="true">
                             {this.piece}
                         </div>
                     </focusable-item>

@@ -2,30 +2,19 @@
     display: grid;
     grid-template-columns: 3em repeat(8, 1fr) 3em;
     grid-template-rows: 3em repeat(8, 1fr) 3em;
+    align-items: center;
+
     height: 46rem;
     width: 46rem;
-    margin: 2 em;
+    margin: 2em auto;
     padding: 2em;
     background-color: #DEB887;
 }
 
-.top-row {
-    display: flex;
-    justify-content: space-between;
-    grid-column-start: 2;
-    grid-column-end: 9;
+.col-header {
+    text-align: center;
 }
 
-.bottom-row {
-    display: flex;
-    justify-content: space-between;
-    grid-column-start: 2;
-    grid-column-end: 9;
-}
-
-.row {
-    display: flex;
-    grid-column-start: 1;
-    grid-column-end: 10;
-    justify-content: space-between;
+.row-header {
+    text-align: center;
 }
