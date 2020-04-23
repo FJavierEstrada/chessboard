@@ -15,32 +15,32 @@ export class KeyboardNavigationListener {
     protected upArrowHandler(event: CustomEvent<any>) {
         event?.stopPropagation();
         const itemToFocus = this.handler.getUpItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
     @Listen('downArrow')
     protected downArrowHandler(event: CustomEvent<any>) {
         event?.stopPropagation();
         const itemToFocus = this.handler.getDownItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
     @Listen('leftArrow')
     protected leftArrowHandler(event: CustomEvent<any>) {
         event?.stopPropagation();
         const itemToFocus = this.handler.getLeftItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
     @Listen('rightArrow')
     protected rightArrowHandler(event: CustomEvent<any>) {
         event?.stopPropagation();
         const itemToFocus = this.handler.getRightItem();
-        this.focus(itemToFocus);
+        this.focusItem(itemToFocus);
     }
 
-    focus(item: HTMLElement | undefined) {
-        if (item) item.focus();
+    focusItem(item: HTMLElement | undefined) {
+        if (item instanceof HTMLElement) item.focus();
     }
 
     render() {
