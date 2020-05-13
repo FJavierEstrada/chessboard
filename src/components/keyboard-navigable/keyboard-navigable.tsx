@@ -5,7 +5,7 @@ import { KeyCodes } from '../../utils/keyboard-utils';
 @Component({
     tag: 'keyboard-navigable',
     styleUrl: 'keyboard-navigable.css',
-    shadow: true
+    shadow: false
 })
 export class KeyboardNavigable {
 
