@@ -37,13 +37,13 @@ export class ChessSquare {
                     "white-square": this.getColour() === SquareColour.white,
                     "black-square": this.getColour() === SquareColour.black,
                 }}
-                role="button"
-                aria-label={this.getAccessibleDescription()}
             >
                 <keyboard-navigable>
                     <focusable-item
                         position={{ row: this.row, column: this.column }}
                         isInTabSequence={this.isFirstSquare()}
+                        role="button"
+                        aria-label={this.getAccessibleDescription()}
                     >
                         <div class="hidder" aria-hidden="true">
                             {this.piece}
