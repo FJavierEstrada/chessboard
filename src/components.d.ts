@@ -5,13 +5,14 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { BoardSide, ChessPiece, } from "./utils/chess-utils";
+import { BoardModel, BoardSide, ChessPiece, } from "./utils/chess-utils";
 import { FocusedItemHandler, ItemPosition, } from "./abstraction/FocusedItemHandler";
 import { KeyboardNavigationHandler, } from "./abstraction/KeyboardNavigationHandler";
 export namespace Components {
     interface AppRoot {
     }
     interface ChessBoard {
+        "boardModel": BoardModel;
         "side": BoardSide;
     }
     interface ChessSquare {
@@ -90,6 +91,7 @@ declare namespace LocalJSX {
     interface AppRoot {
     }
     interface ChessBoard {
+        "boardModel": BoardModel;
         "side": BoardSide;
     }
     interface ChessSquare {

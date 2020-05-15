@@ -13,25 +13,16 @@ import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationH
 export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler {
 
     @Prop() side!: BoardSide;
+    @Prop() boardModel!: BoardModel;
 
-    @State() boardModel: BoardModel;
-    @State() navigabilityStrategy: DirectionalNavigabilityStrategy;
-    @State() boardRenderer: BoardRenderer;
-
+    navigabilityStrategy: DirectionalNavigabilityStrategy;
+    boardRenderer: BoardRenderer;
+    private focusedSquare: ItemPosition2D;
 
     @Element() element: HTMLElement;
 
-    private focusedSquare: ItemPosition2D;
-
-    @Watch('side')
-    sideChanged(newSide: BoardSide) {
-        console.debug("Watching side");
-        this.setNavigationAndRenderStrategies(newSide);
-    }
-
-    componentWillLoad() {
+    componentWillRender() {
         this.setNavigationAndRenderStrategies(this.side);
-        this.boardModel = this.generateDefaultPosition();
     }
 
     getLeftItem(): HTMLElement {
@@ -91,26 +82,6 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
                 </focused-item-listener>
             </Host >
         );
-    }
-
-    private generateDefaultPosition(): BoardModel {
-        function generateFilledRow(piece: ChessPiece): ChessPiece[] {
-            const row: ChessPiece[] = [];
-            for (let i = 0; i < 8; i++) {
-                row.push(piece);
-            }
-            return row;
-        }
-
-        const board: BoardModel = [];
-        board.push(["r", "n", "b", "q", "k", "b", "n", "r"]);
-        board.push(generateFilledRow("p"));
-        for (let i = 2; i < 6; i++) {
-            board.push(generateFilledRow(null));
-        }
-        board.push(generateFilledRow("P"));
-        board.push(["R", "N", "B", "Q", "K", "B", "N", "R"]);
-        return board;
     }
 
     private setNavigationAndRenderStrategies(side: BoardSide) {
