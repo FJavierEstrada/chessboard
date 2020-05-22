@@ -111,3 +111,11 @@ export class BlackSideNavigabilityStrategy implements DirectionalNavigabilityStr
     }
 
 }
+
+export function isValidMove(start: ItemPosition2D, end: ItemPosition2D): boolean {
+    if (start.row !== end.row || start.column !== end.column) {
+        // Additional checks would be here.
+        return true;
+    }
+    return false;
+}

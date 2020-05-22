@@ -1,5 +1,5 @@
 import { Component, h, Prop, Host, Element, Event, EventEmitter, State } from '@stencil/core';
-import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, BoardModel, ChessMove } from '../../utils/chess-utils';
+import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, BoardModel, ChessMove, isValidMove } from '../../utils/chess-utils';
 import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
 import { FocusedItemHandler, ItemPosition, ItemPosition2D, isPosition2D } from '../../abstraction/FocusedItemHandler';
 import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
@@ -65,7 +65,9 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
             if (!this.selectedSquare) {
                 this.selectedSquare = position;
             } else {
-                this.move.emit({ start: this.selectedSquare, end: position });
+                if (isValidMove(this.selectedSquare, position)) {
+                    this.move.emit({ start: this.selectedSquare, end: position });
+                }
                 this.selectedSquare = undefined;
             }
         }
