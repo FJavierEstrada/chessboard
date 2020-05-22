@@ -1,5 +1,5 @@
-import { Component, h, Prop, State, Watch, Host, Element } from '@stencil/core';
-import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, ChessPiece, BoardModel } from '../../utils/chess-utils';
+import { Component, h, Prop, Host, Element, Event, EventEmitter, State } from '@stencil/core';
+import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrategy, BlackSideNavigabilityStrategy, BoardModel, ChessMove } from '../../utils/chess-utils';
 import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
 import { FocusedItemHandler, ItemPosition, ItemPosition2D, isPosition2D } from '../../abstraction/FocusedItemHandler';
 import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
@@ -16,8 +16,12 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     @Prop() side!: BoardSide;
     @Prop() boardModel!: BoardModel;
 
-    navigabilityStrategy: DirectionalNavigabilityStrategy;
-    boardRenderer: BoardRenderer;
+    @State() selectedSquare?: ItemPosition2D;
+
+    @Event() move: EventEmitter<ChessMove>;
+
+    private navigabilityStrategy: DirectionalNavigabilityStrategy;
+    private boardRenderer: BoardRenderer;
     private focusedSquare: ItemPosition2D;
 
     @Element() element: HTMLElement;
@@ -28,25 +32,25 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
 
     getLeftItem(): HTMLElement {
         const leftCoordinates = this.navigabilityStrategy.getLeftCoordinates(this.focusedSquare);
-        const square = this.getSquareToFocus(leftCoordinates);
+        const square = this.getSquare(leftCoordinates);
         return square.querySelector("focusable-item") as HTMLElement;
     }
 
     getRightItem(): HTMLElement {
         const RightCoordinates = this.navigabilityStrategy.getRightCoordinates(this.focusedSquare);
-        const square = this.getSquareToFocus(RightCoordinates);
+        const square = this.getSquare(RightCoordinates);
         return square.querySelector("focusable-item") as HTMLElement;
     }
 
     getUpItem(): HTMLElement {
         const upCoordinates = this.navigabilityStrategy.getUpCoordinates(this.focusedSquare);
-        const square = this.getSquareToFocus(upCoordinates);
+        const square = this.getSquare(upCoordinates);
         return square.querySelector("focusable-item") as HTMLElement;
     }
 
     getDownItem(): HTMLElement {
         const downCoordinates = this.navigabilityStrategy.getDownCoordinates(this.focusedSquare);
-        const square = this.getSquareToFocus(downCoordinates);
+        const square = this.getSquare(downCoordinates);
         return square.querySelector("focusable-item") as HTMLElement;
     }
 
@@ -57,7 +61,14 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     }
 
     notifyActivation(position: ItemPosition) {
-        // TODO
+        if (isPosition2D(position)) {
+            if (!this.selectedSquare) {
+                this.selectedSquare = position;
+            } else {
+                this.move.emit({ start: this.selectedSquare, end: position });
+                this.selectedSquare = undefined;
+            }
+        }
     }
 
     render() {
@@ -101,9 +112,9 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
         }
     }
 
-    private getSquareToFocus(position: ItemPosition2D): HTMLElement {
+    private getSquare(position: ItemPosition2D): HTMLChessSquareElement {
         const squareCollection = (this.element.shadowRoot as ShadowRoot).querySelectorAll("chess-square");
-        return squareCollection.item(this.navigabilityStrategy.translateCoordinatesToOneDimension(position)) as HTMLElement;
+        return squareCollection.item(this.navigabilityStrategy.translateCoordinatesToOneDimension(position)) as HTMLChessSquareElement;
     }
 
 }

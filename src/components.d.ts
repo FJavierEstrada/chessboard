@@ -7,7 +7,7 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { FocusedItemHandler, ItemPosition, } from "./abstraction/FocusedItemHandler";
 import { ActivatedItemHandler, } from "./abstraction/ActivatedItemHandler";
-import { BoardModel, BoardSide, ChessPiece, } from "./utils/chess-utils";
+import { BoardModel, BoardSide, ChessMove, ChessPiece, } from "./utils/chess-utils";
 import { KeyboardNavigationHandler, } from "./abstraction/KeyboardNavigationHandler";
 export namespace Components {
     interface ActivableItem {
@@ -125,6 +125,7 @@ declare namespace LocalJSX {
     }
     interface ChessBoard {
         "boardModel": BoardModel;
+        "onMove"?: (event: CustomEvent<ChessMove>) => void;
         "side": BoardSide;
     }
     interface ChessSquare {

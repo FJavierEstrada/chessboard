@@ -6,6 +6,11 @@ export type BoardModel = ChessPiece[][];
 
 export type BoardView = HTMLElement[][];
 
+export interface ChessMove {
+    start: ItemPosition2D;
+    end: ItemPosition2D;
+}
+
 export enum ChessPieceDescription {
     K = "White king",
     Q = "White queen",
