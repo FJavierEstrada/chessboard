@@ -14,11 +14,11 @@ export class ActivableItem {
     @Prop() space: boolean = true;
     @Prop() enter: boolean = true;
 
-    @Event() activated: EventEmitter<ItemPosition>;
+    @Event() activatedItem: EventEmitter<ItemPosition>;
 
     @Listen('click')
     protected clickHandler() {
-        this.activated.emit(this.position);
+        this.activatedItem.emit(this.position);
     }
 
     @Listen('keyup')
@@ -29,8 +29,8 @@ export class ActivableItem {
             emitter.emit(this.position);
         }
 
-        if (this.space && event.key === KeyCodes.SPACE) activate(event, this.activated);
-        else if (this.enter && event.key === KeyCodes.RETURN) activate(event, this.activated);
+        if (this.space && event.key === KeyCodes.SPACE) activate(event, this.activatedItem);
+        else if (this.enter && event.key === KeyCodes.RETURN) activate(event, this.activatedItem);
     }
 
     render() {
