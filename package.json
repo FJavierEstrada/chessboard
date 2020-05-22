@@ -19,6 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/jest": "^25.2.1"
+    "@types/jest": "^25.2.1",
+    "redux": "^4.0.5"
   }
 }
