@@ -1,5 +1,5 @@
-import { Component, h, State } from '@stencil/core';
-import { BoardSide, BoardModel, ChessPiece } from '../../utils/chess-utils';
+import { Component, h, State, Listen } from '@stencil/core';
+import { BoardSide, BoardModel, ChessPiece, ChessMove, ChessPieceDescription, arrayToBoardColumn, arrayToBoardRow } from '../../utils/chess-utils';
 
 
 @Component({
@@ -11,9 +11,23 @@ export class AppRoot {
 
   @State() side: BoardSide = BoardSide.white;
   @State() boardModel: BoardModel = this.generateDefaultPosition();
+  @State() moveNotificationMsg: string = "";
+
+  @Listen('move')
+  protected moveHandler(event: CustomEvent<ChessMove>) {
+    const move = event.detail;
+    this.changeMoveNotification(move);
+  }
+
+  changeMoveNotification = (move: ChessMove) => {
+    const piece = this.boardModel[move.start.row][move.start.column] as string;
+    const pieceDescription = ChessPieceDescription[piece];
+    const verb = this.boardModel[move.end.row][move.end.column] === null ? "moves to " : "takes";
+    const endSquare = `${arrayToBoardColumn(move.end.column)}${arrayToBoardRow(move.end.row)}`;
+    this.moveNotificationMsg = `${pieceDescription} ${verb} ${endSquare}`;
+  }
 
   toggleSide = () => {
-    console.debug("Toggling board side.");
     console.debug(this.side);
     if (this.side === BoardSide.white) this.side = BoardSide.black;
     else this.side = BoardSide.white;
@@ -32,6 +46,9 @@ export class AppRoot {
             boardModel={this.boardModel}
           />
           <button onClick={this.toggleSide}>Toggle side</button>
+          <div class="sr-only" aria-live="polite" aria-atomic="true">
+            {this.moveNotificationMsg}
+          </div>
         </main>
       </div>
     );
