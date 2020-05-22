@@ -65,7 +65,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
             if (!this.selectedSquare) {
                 this.selectedSquare = position;
             } else {
-                if (isValidMove(this.selectedSquare, position)) {
+                if (isValidMove(this.selectedSquare, position, this.boardModel)) {
                     this.move.emit({ start: this.selectedSquare, end: position });
                 }
                 this.selectedSquare = undefined;
