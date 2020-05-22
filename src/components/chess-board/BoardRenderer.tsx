@@ -1,15 +1,16 @@
 import { h } from '@stencil/core';
 import { BoardModel, BoardView, ChessPiece, BoardSide, arrayToBoardColumn, arrayToBoardRow } from "../../utils/chess-utils";
+import { ItemPosition2D } from '../../abstraction/FocusedItemHandler';
 
 export interface BoardRenderer {
-    renderBoard(model: BoardModel): BoardView;
+    renderBoard(model: BoardModel, selectedPosition?: ItemPosition2D): BoardView;
     renderNumber(row: number): HTMLElement;
     renderCharacters(): HTMLElement[];
 }
 
 export class WhiteSideRenderer implements BoardRenderer {
 
-    renderBoard(model: BoardModel): BoardView {
+    renderBoard(model: BoardModel, selectedPosition?: ItemPosition2D): BoardView {
         const view: BoardView = [];
         model.forEach((row: ChessPiece[], i: number) => {
             const rowView: HTMLElement[] = [];
@@ -20,6 +21,7 @@ export class WhiteSideRenderer implements BoardRenderer {
                         column={j}
                         piece={square}
                         side={BoardSide.white}
+                        selected={selectedPosition && selectedPosition.row === i && selectedPosition.column === j}
                     />
                 );
             });
@@ -51,7 +53,7 @@ export class WhiteSideRenderer implements BoardRenderer {
 
 export class BlackSideRenderer implements BoardRenderer {
 
-    renderBoard(model: BoardModel): BoardView {
+    renderBoard(model: BoardModel, selectedPosition?: ItemPosition2D): BoardView {
         const view: BoardView = [];
         [...model].reverse().forEach((row: ChessPiece[], i: number) => {
             const rowView: HTMLElement[] = [];
@@ -62,6 +64,7 @@ export class BlackSideRenderer implements BoardRenderer {
                         column={7 - j}
                         piece={square}
                         side={BoardSide.black}
+                        selected={selectedPosition && selectedPosition.row === i && selectedPosition.column === j}
                     />
                 );
             });

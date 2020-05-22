@@ -16,7 +16,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     @Prop() side!: BoardSide;
     @Prop() boardModel!: BoardModel;
 
-    @State() selectedSquare?: ItemPosition2D;
+    @State() selectedSquare?: ItemPosition2D = undefined;
 
     @Event() move: EventEmitter<ChessMove>;
 
@@ -82,7 +82,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
                                 {this.boardRenderer.renderCharacters()}
                                 <div class="corner"></div>
 
-                                {this.boardRenderer.renderBoard(this.boardModel).map((row: HTMLElement[], index: number) => {
+                                {this.boardRenderer.renderBoard(this.boardModel, this.selectedSquare).map((row: HTMLElement[], index: number) => {
                                     return [
                                         this.boardRenderer.renderNumber(index),
                                         ...row,
