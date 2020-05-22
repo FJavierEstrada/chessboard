@@ -5,10 +5,19 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { BoardModel, BoardSide, ChessPiece, } from "./utils/chess-utils";
 import { FocusedItemHandler, ItemPosition, } from "./abstraction/FocusedItemHandler";
+import { ActivatedItemHandler, } from "./abstraction/ActivatedItemHandler";
+import { BoardModel, BoardSide, ChessPiece, } from "./utils/chess-utils";
 import { KeyboardNavigationHandler, } from "./abstraction/KeyboardNavigationHandler";
 export namespace Components {
+    interface ActivableItem {
+        "enter": boolean;
+        "position": ItemPosition;
+        "space": boolean;
+    }
+    interface ActivatedItemListener {
+        "handler": ActivatedItemHandler;
+    }
     interface AppRoot {
     }
     interface ChessBoard {
@@ -19,6 +28,7 @@ export namespace Components {
         "column": number;
         "piece"?: ChessPiece;
         "row": number;
+        "selected": boolean;
         "side": BoardSide;
     }
     interface FocusableItem {
@@ -35,6 +45,18 @@ export namespace Components {
     }
 }
 declare global {
+    interface HTMLActivableItemElement extends Components.ActivableItem, HTMLStencilElement {
+    }
+    var HTMLActivableItemElement: {
+        prototype: HTMLActivableItemElement;
+        new (): HTMLActivableItemElement;
+    };
+    interface HTMLActivatedItemListenerElement extends Components.ActivatedItemListener, HTMLStencilElement {
+    }
+    var HTMLActivatedItemListenerElement: {
+        prototype: HTMLActivatedItemListenerElement;
+        new (): HTMLActivatedItemListenerElement;
+    };
     interface HTMLAppRootElement extends Components.AppRoot, HTMLStencilElement {
     }
     var HTMLAppRootElement: {
@@ -78,6 +100,8 @@ declare global {
         new (): HTMLKeyboardNavigationListenerElement;
     };
     interface HTMLElementTagNameMap {
+        "activable-item": HTMLActivableItemElement;
+        "activated-item-listener": HTMLActivatedItemListenerElement;
         "app-root": HTMLAppRootElement;
         "chess-board": HTMLChessBoardElement;
         "chess-square": HTMLChessSquareElement;
@@ -88,6 +112,15 @@ declare global {
     }
 }
 declare namespace LocalJSX {
+    interface ActivableItem {
+        "enter"?: boolean;
+        "onActivatedItem"?: (event: CustomEvent<ItemPosition>) => void;
+        "position"?: ItemPosition;
+        "space"?: boolean;
+    }
+    interface ActivatedItemListener {
+        "handler": ActivatedItemHandler;
+    }
     interface AppRoot {
     }
     interface ChessBoard {
@@ -98,6 +131,7 @@ declare namespace LocalJSX {
         "column": number;
         "piece"?: ChessPiece;
         "row": number;
+        "selected"?: boolean;
         "side": BoardSide;
     }
     interface FocusableItem {
@@ -118,6 +152,8 @@ declare namespace LocalJSX {
         "handler"?: KeyboardNavigationHandler;
     }
     interface IntrinsicElements {
+        "activable-item": ActivableItem;
+        "activated-item-listener": ActivatedItemListener;
         "app-root": AppRoot;
         "chess-board": ChessBoard;
         "chess-square": ChessSquare;
@@ -131,6 +167,8 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            "activable-item": LocalJSX.ActivableItem & JSXBase.HTMLAttributes<HTMLActivableItemElement>;
+            "activated-item-listener": LocalJSX.ActivatedItemListener & JSXBase.HTMLAttributes<HTMLActivatedItemListenerElement>;
             "app-root": LocalJSX.AppRoot & JSXBase.HTMLAttributes<HTMLAppRootElement>;
             "chess-board": LocalJSX.ChessBoard & JSXBase.HTMLAttributes<HTMLChessBoardElement>;
             "chess-square": LocalJSX.ChessSquare & JSXBase.HTMLAttributes<HTMLChessSquareElement>;

@@ -14,6 +14,7 @@ export class ChessSquare {
     @Prop() column!: number;
     @Prop() piece?: ChessPiece;
     @Prop() side!: BoardSide;
+    @Prop() selected: boolean = false;
 
     private getColour = (): SquareColour => {
         if ((this.row + this.column) % 2 === 0) return SquareColour.white;
@@ -44,6 +45,7 @@ export class ChessSquare {
                         isInTabSequence={this.isFirstSquare()}
                         role="button"
                         aria-label={this.getAccessibleDescription()}
+                        aria-pressed={this.selected ? "true" : "false"}
                     >
                         <div class="hidder" aria-hidden="true">
                             {this.piece}
