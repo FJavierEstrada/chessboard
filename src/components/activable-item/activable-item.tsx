@@ -23,14 +23,14 @@ export class ActivableItem {
 
     @Listen('keyup')
     protected keyupHandler(event: KeyboardEvent) {
-        function activate(event: KeyboardEvent, emitter: EventEmitter<ItemPosition>) {
+        function activate(event: KeyboardEvent, emitter: EventEmitter<ItemPosition>, position: ItemPosition) {
             event.preventDefault();
             event.stopPropagation();
-            emitter.emit(this.position);
+            emitter.emit(position);
         }
 
-        if (this.space && event.key === KeyCodes.SPACE) activate(event, this.activatedItem);
-        else if (this.enter && event.key === KeyCodes.RETURN) activate(event, this.activatedItem);
+        if (this.space && event.key === KeyCodes.SPACE) activate(event, this.activatedItem, this.position);
+        else if (this.enter && event.key === KeyCodes.RETURN) activate(event, this.activatedItem, this.position);
     }
 
     render() {
