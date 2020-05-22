@@ -23,6 +23,10 @@ chess-square:focus-within {
     color: white;
 }
 
+.selected {
+    border: 2px dashed red;
+}
+
 .hidder {
     height: 100%;
     width: 100%;

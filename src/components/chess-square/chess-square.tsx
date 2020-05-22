@@ -37,6 +37,7 @@ export class ChessSquare {
                 class={{
                     "white-square": this.getColour() === SquareColour.white,
                     "black-square": this.getColour() === SquareColour.black,
+                    selected: this.selected
                 }}
             >
                 <keyboard-navigable>
