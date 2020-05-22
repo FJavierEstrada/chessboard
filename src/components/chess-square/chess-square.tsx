@@ -41,17 +41,19 @@ export class ChessSquare {
                 }}
             >
                 <keyboard-navigable>
-                    <focusable-item
-                        position={{ row: this.row, column: this.column }}
-                        isInTabSequence={this.isFirstSquare()}
-                        role="button"
-                        aria-label={this.getAccessibleDescription()}
-                        aria-pressed={this.selected ? "true" : "false"}
-                    >
-                        <div class="hidder" aria-hidden="true">
-                            {this.piece}
-                        </div>
-                    </focusable-item>
+                    <activable-item position={{ row: this.row, column: this.column }}>
+                        <focusable-item
+                            position={{ row: this.row, column: this.column }}
+                            isInTabSequence={this.isFirstSquare()}
+                            role="button"
+                            aria-label={this.getAccessibleDescription()}
+                            aria-pressed={this.selected ? "true" : "false"}
+                        >
+                            <div class="hidder" aria-hidden="true">
+                                {this.piece}
+                            </div>
+                        </focusable-item>
+                    </activable-item>
                 </keyboard-navigable>
             </Host >
         );

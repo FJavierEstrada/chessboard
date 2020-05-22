@@ -3,6 +3,7 @@ import { BoardSide, DirectionalNavigabilityStrategy, WhiteSideNavigabilityStrate
 import { BoardRenderer, WhiteSideRenderer, BlackSideRenderer } from './BoardRenderer';
 import { FocusedItemHandler, ItemPosition, ItemPosition2D, isPosition2D } from '../../abstraction/FocusedItemHandler';
 import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationHandler';
+import { ActivatedItemHandler } from '../../abstraction/ActivatedItemHandler';
 
 
 @Component({
@@ -10,7 +11,7 @@ import { KeyboardNavigationHandler } from '../../abstraction/KeyboardNavigationH
     styleUrl: 'chess-board.css',
     shadow: true
 })
-export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler {
+export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler, ActivatedItemHandler {
 
     @Prop() side!: BoardSide;
     @Prop() boardModel!: BoardModel;
@@ -55,30 +56,36 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
         }
     }
 
+    notifyActivation(position: ItemPosition) {
+        // TODO
+    }
+
     render() {
         return (
             <Host role="application">
                 <focused-item-listener handler={this}>
-                    <keyboard-navigation-listener handler={this}>
-                        <div class="board">
-                            <div class="corner"></div>
-                            {this.boardRenderer.renderCharacters()}
-                            <div class="corner"></div>
+                    <activated-item-listener handler={this}>
+                        <keyboard-navigation-listener handler={this}>
+                            <div class="board">
+                                <div class="corner"></div>
+                                {this.boardRenderer.renderCharacters()}
+                                <div class="corner"></div>
 
-                            {this.boardRenderer.renderBoard(this.boardModel).map((row: HTMLElement[], index: number) => {
-                                return [
-                                    this.boardRenderer.renderNumber(index),
-                                    ...row,
-                                    this.boardRenderer.renderNumber(index)
-                                ]
-                            })
-                            }
+                                {this.boardRenderer.renderBoard(this.boardModel).map((row: HTMLElement[], index: number) => {
+                                    return [
+                                        this.boardRenderer.renderNumber(index),
+                                        ...row,
+                                        this.boardRenderer.renderNumber(index)
+                                    ]
+                                })
+                                }
 
-                            <div class="corner"></div>
-                            {this.boardRenderer.renderCharacters()}
-                            <div class="corner"></div>
-                        </div>
-                    </keyboard-navigation-listener>
+                                <div class="corner"></div>
+                                {this.boardRenderer.renderCharacters()}
+                                <div class="corner"></div>
+                            </div>
+                        </keyboard-navigation-listener>
+                    </activated-item-listener>
                 </focused-item-listener>
             </Host >
         );
