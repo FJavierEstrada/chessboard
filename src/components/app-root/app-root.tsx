@@ -17,6 +17,13 @@ export class AppRoot {
   protected moveHandler(event: CustomEvent<ChessMove>) {
     const move = event.detail;
     this.changeMoveNotification(move);
+    this.movePiece(move);
+  }
+
+  movePiece = (move: ChessMove) => {
+    const piece = this.boardModel[move.start.row][move.start.column];
+    this.boardModel[move.start.row][move.start.column] = null;
+    this.boardModel[move.end.row][move.end.column] = piece;
   }
 
   changeMoveNotification = (move: ChessMove) => {
@@ -28,7 +35,6 @@ export class AppRoot {
   }
 
   toggleSide = () => {
-    console.debug(this.side);
     if (this.side === BoardSide.white) this.side = BoardSide.black;
     else this.side = BoardSide.white;
   }
