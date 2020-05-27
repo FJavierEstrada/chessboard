@@ -19,6 +19,7 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
     @State() selectedSquare?: ItemPosition2D = undefined;
 
     @Event() move: EventEmitter<ChessMove>;
+    @Event() invalidMove: EventEmitter<ChessMove>;
 
     private navigabilityStrategy: DirectionalNavigabilityStrategy;
     private boardRenderer: BoardRenderer;
@@ -65,8 +66,11 @@ export class ChessBoard implements KeyboardNavigationHandler, FocusedItemHandler
             if (!this.selectedSquare) {
                 this.selectedSquare = position;
             } else {
+                const move = { start: this.selectedSquare, end: position };
                 if (isValidMove(this.selectedSquare, position, this.boardModel)) {
-                    this.move.emit({ start: this.selectedSquare, end: position });
+                    this.move.emit(move);
+                } else {
+                    this.invalidMove.emit(move);
                 }
                 this.selectedSquare = undefined;
             }

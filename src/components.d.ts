@@ -125,6 +125,7 @@ declare namespace LocalJSX {
     }
     interface ChessBoard {
         "boardModel": BoardModel;
+        "onInvalidMove"?: (event: CustomEvent<ChessMove>) => void;
         "onMove"?: (event: CustomEvent<ChessMove>) => void;
         "side": BoardSide;
     }

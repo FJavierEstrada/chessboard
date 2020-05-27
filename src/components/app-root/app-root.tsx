@@ -20,6 +20,11 @@ export class AppRoot {
     this.boardModel = this.movePiece(move);
   }
 
+  @Listen('invalidMove')
+  protected invalidMoveHandler(event) {
+    this.moveNotificationMsg = "Invalid move!";
+  }
+
   movePiece = (move: ChessMove) => {
     const tempBoard = this.boardModel.slice();
     const piece = tempBoard[move.start.row][move.start.column];
