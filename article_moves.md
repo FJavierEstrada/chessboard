@@ -1,9 +1,9 @@
 ## Índice
 
-* [1 - Introducción](#1)
-* [2 - Entorno](#2)
+* [1 - Introducción](#s1)
+* [2 - Entorno](#s2)
 
-## <a name="1"></a>1 - Introducción
+## <a id="s1">1 - Introducción</a>
 
 Las regiones activas o live regions son fundamentales para la accesibilidad en las aplicaciones modernas. Hace años, la web se componía de documentos estáticos y los únicos cambios en el contenido se producían al cargar nuevas páginas. Hoy en día, estos cambios son completamente dinámicos. Este tipo de comportamiento es especialmente problemático cuando tratamos con usuarios con algún tipo de discapacidad sensorial. Al no percibir las alteraciones del contenido, puede costarles entender qué está pasando y cómo deben actuar en cada momento.
 
@@ -11,7 +11,7 @@ Las regiones activas vienen a solventar este problema. Los cambios en el conteni
 
 En este tutorial, vamos a ampliar [la aplicación de muestra ChessBoard que ya vimos en otro tutorial](https://www.adictosaltrabajo.com/2020/05/15/reutilizacion-de-codigo-con-web-components/). Vamos a añadir la capacidad de mover las piezas por el tablero y vamos a crear una región activa que anuncie al usuario los movimientos que se llevan a cabo. Por supuesto, esta funcionalidad se va a implementar a grandes rasgos, sin entrar en la validación de los movimientos. Además, vamos a ver cuestiones adicionales de accesibilidad.
 
-## <a name="2"></a>2 – Entorno
+## <a id="s2">2 – Entorno</a>
 
 *Windows 10
 
