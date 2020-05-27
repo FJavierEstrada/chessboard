@@ -25,6 +25,8 @@ Las regiones activas vienen a solventar este problema. Los cambios en el conteni
 
 En este tutorial, vamos a ampliar [la aplicación de muestra ChessBoard que ya vimos en otro tutorial](https://www.adictosaltrabajo.com/2020/05/15/reutilizacion-de-codigo-con-web-components/). Vamos a añadir la capacidad de mover las piezas por el tablero y vamos a crear una región activa que anuncie al usuario los movimientos que se llevan a cabo. Por supuesto, esta funcionalidad se va a implementar a grandes rasgos, sin entrar en la validación de los movimientos. Además, vamos a ver cuestiones adicionales de accesibilidad.
 
+Aquí tenéis el [enlace al repositorio en GitHub](https://github.com/FJavierEstrada/chessboard/tree/move).
+
 ## 2 – Entorno
 
 *Windows 10
