@@ -1,7 +1,11 @@
 ## Índice
 
+<nav aria-label="índice">
+
 * [1 - Introducción](#1)
 * [2 - Entorno](#2)
+
+</nav>
 
 <a name="1">
 
