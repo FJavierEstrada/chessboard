@@ -1,9 +1,23 @@
-## Índice
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+Índice
 
-* [1 - Introducción](#s1)
-* [2 - Entorno](#s2)
+* [1 - Introducción](#1---introducci%C3%B3n)
+* [2 – Entorno](#2--entorno)
+* [3 – Planteando la funcionalidad](#3--planteando-la-funcionalidad)
+* [4 – Manejo de la activación](#4--manejo-de-la-activaci%C3%B3n)
+  + [4.1. – El componente ActivableItem](#41--el-componente-activableitem)
+  + [4.2 – El componente ActivatedItemListener](#42--el-componente-activateditemlistener)
+  + [4.3 – La interfaz ActivatedItemHandler](#43--la-interfaz-activateditemhandler)
+* [5 – Integrar la activación](#5--integrar-la-activaci%C3%B3n)
+  + [5.1 – Las casillas](#51--las-casillas)
+  + [5.2 – El tablero](#52--el-tablero)
+* [6 – Ejecutando los movimientos](#6--ejecutando-los-movimientos)
+* [7 – Conclusiones](#7--conclusiones)
 
-## <a id="s1">1 - Introducción</a>
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## 1 - Introducción
 
 Las regiones activas o live regions son fundamentales para la accesibilidad en las aplicaciones modernas. Hace años, la web se componía de documentos estáticos y los únicos cambios en el contenido se producían al cargar nuevas páginas. Hoy en día, estos cambios son completamente dinámicos. Este tipo de comportamiento es especialmente problemático cuando tratamos con usuarios con algún tipo de discapacidad sensorial. Al no percibir las alteraciones del contenido, puede costarles entender qué está pasando y cómo deben actuar en cada momento.
 
@@ -11,7 +25,7 @@ Las regiones activas vienen a solventar este problema. Los cambios en el conteni
 
 En este tutorial, vamos a ampliar [la aplicación de muestra ChessBoard que ya vimos en otro tutorial](https://www.adictosaltrabajo.com/2020/05/15/reutilizacion-de-codigo-con-web-components/). Vamos a añadir la capacidad de mover las piezas por el tablero y vamos a crear una región activa que anuncie al usuario los movimientos que se llevan a cabo. Por supuesto, esta funcionalidad se va a implementar a grandes rasgos, sin entrar en la validación de los movimientos. Además, vamos a ver cuestiones adicionales de accesibilidad.
 
-## <a id="s2">2 – Entorno</a>
+## 2 – Entorno
 
 *Windows 10
 
