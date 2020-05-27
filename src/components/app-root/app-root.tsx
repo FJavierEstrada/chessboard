@@ -17,13 +17,15 @@ export class AppRoot {
   protected moveHandler(event: CustomEvent<ChessMove>) {
     const move = event.detail;
     this.changeMoveNotification(move);
-    this.movePiece(move);
+    this.boardModel = this.movePiece(move);
   }
 
   movePiece = (move: ChessMove) => {
-    const piece = this.boardModel[move.start.row][move.start.column];
-    this.boardModel[move.start.row][move.start.column] = null;
-    this.boardModel[move.end.row][move.end.column] = piece;
+    const tempBoard = this.boardModel.slice();
+    const piece = tempBoard[move.start.row][move.start.column];
+    tempBoard[move.start.row][move.start.column] = null;
+    tempBoard[move.end.row][move.end.column] = piece;
+    return tempBoard;
   }
 
   changeMoveNotification = (move: ChessMove) => {
