@@ -21,7 +21,7 @@ export class AppRoot {
   }
 
   @Listen('invalidMove')
-  protected invalidMoveHandler(event) {
+  protected invalidMoveHandler() {
     this.moveNotificationMsg = "Invalid move!";
   }
 

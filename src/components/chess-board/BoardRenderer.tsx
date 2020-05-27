@@ -17,6 +17,7 @@ export class WhiteSideRenderer implements BoardRenderer {
             row.forEach((square: ChessPiece, j: number) => {
                 rowView.push(
                     <chess-square
+                        key={`${i}${j}`}
                         row={i}
                         column={j}
                         piece={square}
@@ -60,6 +61,7 @@ export class BlackSideRenderer implements BoardRenderer {
             row.reverse().forEach((square: ChessPiece, j: number) => {
                 rowView.push(
                     <chess-square
+                        key={`${i}${j}`}
                         row={7 - i}
                         column={7 - j}
                         piece={square}
